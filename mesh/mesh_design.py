@@ -54,7 +54,7 @@ STACKUP = dict(
 
 DECISIONS = dict(
     rf_network="johanson-ipd",   # 0900FM15K0039001E -- see block D
-    antenna="ufl-bulkhead",      # u.FL on board + SMA(F) bulkhead pigtail
+    antenna="sma-right-angle",   # BWSMA-KWE-Z001, through-hole, thickness-agnostic
     flash_mpn="W25Q32JVSSIQ",    # QE fixed in silicon; no boot2 override needed
     rails="two-ldo",      # U6 carries the whole radio: 120 mA at +22 dBm. Worst case
                           # (5.5-3.3)*0.120 = 0.264 W into a SOT-23-5 at RthJA 193.4 C/W
@@ -76,7 +76,7 @@ FP = dict(
     LED="LED_SMD:LED_0603_1608Metric",
     SW="Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A",
     USBC="Connector_USB:USB_C_Plug_JAE_DX07P024AJ1",
-    UFL="Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical",
+    SMA="Connector_Coaxial:SMA_BAT_Wireless_BWSMA-KWE-Z001",
     IPD="RF_Converter:Balun_Johanson_0900FM15K0039",
     TP="TestPoint:TestPoint_Pad_D1.0mm",
     R="Resistor_SMD:R_0402_1005Metric",
@@ -552,21 +552,32 @@ ant.series("R15", "R", "0R", "ANT1", "ANT2")       # pi series position, linked 
 ant.shunt("C33", "C", "3p9", "ANT1", dnp=True)
 ant.shunt("C34", "C", "3p9", "ANT2", dnp=True)
 
-# u.FL on the board, SMA on the enclosure bulkhead via a pigtail -- not a board-edge SMA.
-# Two board-edge connectors would have to share one thickness window and they do not: the
-# JAE plug needs 0.72-0.88 mm and the only orderable 0.8 mm end-launch SMA (Taoglas
-# EMPCB.SMAFSTJ.B.HT) caps at 0.79 mm, while the fab delivers 0.72-0.88 mm. That leaves a
-# fab tolerance wider than the parts allow, on a part that also costs $3.40, is
-# hand-solder only, and cantilevers a brass cube on a 13 mm lever off the edge of a 0.8 mm
-# board that lives in a laptop port. u.FL is surface-mount, thickness-agnostic, $0.23, and
-# JLCPCB can place it; the strain path moves to the enclosure where it belongs.
-# NOTE the antenna convention: Meshtastic whips are SMA MALE, so the bulkhead must be a
-# standard SMA female jack, not RP-SMA.
-s.place("J1", "Connector:Conn_Coaxial", 327.66, TXY, value="u.FL",
-        footprint=FP["UFL"],
-        props={"MPN": "U.FL-R-SMT-1(10)", "Manufacturer": "Hirose", "LCSC": "C88373",
-               "Description": "u.FL RF receptacle, SMT. Mates to a u.FL-to-SMA(F) "
-                              "bulkhead pigtail; ~30 mating cycles rated."})
+# A real SMA jack on the board, not u.FL and not an edge-clamp launch.
+#
+# The earlier note here said board-edge SMAs were ruled out because the Taoglas
+# EMPCB.SMAFSTJ.B.HT "caps at 0.79 mm". That was a misreading: its specification table
+# says 0.8 mm and only the footprint page says 0.79, and 0.79 mm IS 0.031 in -- the
+# number the whole industry uses for a 0.8 mm board, not a machined cliff.
+#
+# The real objection to an edge launch is different and applies to every one of them:
+# tightening an SMA to its own spec torque (0.57 N.m) puts roughly 134 MPa of shear into
+# a 20 mm x 0.8 mm FR-4 strip, which is past FR-4's shear strength. The whip's weight is
+# irrelevant -- safety factor around 130 -- but the mating torque is not.
+#
+# BWSMA-KWE-Z001 sidesteps both. Its four ground legs and centre pin are THROUGH HOLE, so
+# the mating torque is carried by plated barrels through all four layers instead of by
+# surface pads or a clamp on a 0.8 mm edge, and board thickness stops being a parameter
+# at all. It is a right-angle jack, so the antenna axis lies in the board plane, which is
+# what a stick wants. LCSC stocks it 130k deep at $0.51 against $3.75-4.01 for the edge
+# launches, and KiCad already ships the footprint.
+#
+# It is a standard SMA FEMALE jack, not RP-SMA: Meshtastic whips are SMA male.
+s.place("J1", "Connector:Conn_Coaxial", 327.66, TXY, value="SMA",
+        footprint=FP["SMA"],
+        props={"MPN": "BWSMA-KWE-Z001", "Manufacturer": "BAT Wireless", "LCSC": "C496551",
+               "Description": "SMA(F) right-angle jack, through-hole. Hand-fit after "
+                              "reflow. The enclosure should still capture the body so "
+                              "repeated mating torque does not load the board alone."})
 s.net("ANT2", "J1.1")
 s.net("GND", "J1.2")
 

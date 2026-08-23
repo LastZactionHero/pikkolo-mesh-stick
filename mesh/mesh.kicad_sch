@@ -18228,7 +18228,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "u.FL"
+		(property "Value" "SMA"
 			(at 322.58 327.66 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18239,7 +18239,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
+		(property "Footprint" "Connector_Coaxial:SMA_BAT_Wireless_BWSMA-KWE-Z001"
 			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
@@ -18263,7 +18263,7 @@
 				(justify left)
 			)
 		)
-		(property "Description" "u.FL RF receptacle, SMT. Mates to a u.FL-to-SMA(F) bulkhead pigtail; ~30 mating cycles rated."
+		(property "Description" "SMA(F) right-angle jack, through-hole. Hand-fit after reflow. The enclosure should still capture the body so repeated mating torque does not load the board alone."
 			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
@@ -18299,7 +18299,7 @@
 				(justify left)
 			)
 		)
-		(property "MPN" "U.FL-R-SMT-1(10)"
+		(property "MPN" "BWSMA-KWE-Z001"
 			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
@@ -18311,7 +18311,7 @@
 				(justify left)
 			)
 		)
-		(property "Manufacturer" "Hirose"
+		(property "Manufacturer" "BAT Wireless"
 			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
@@ -18323,7 +18323,7 @@
 				(justify left)
 			)
 		)
-		(property "LCSC" "C88373"
+		(property "LCSC" "C496551"
 			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
