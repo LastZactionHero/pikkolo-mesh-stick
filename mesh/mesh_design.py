@@ -55,7 +55,7 @@ STACKUP = dict(
 DECISIONS = dict(
     rf_network="johanson-ipd",   # 0900FM15K0039001E -- see block D
     antenna="ufl-bulkhead",      # u.FL on board + SMA(F) bulkhead pigtail
-    flash_mpn="W25Q128JVSIQ",    # QE fixed in silicon; no boot2 override needed
+    flash_mpn="W25Q32JVSSIQ",    # QE fixed in silicon; no boot2 override needed
     rails="two-ldo",      # U6 carries the whole radio: 120 mA at +22 dBm. Worst case
                           # (5.5-3.3)*0.120 = 0.264 W into a SOT-23-5 at RthJA 193.4 C/W
                           # = 51 C rise. Acceptable, and a shared rail would put RP2040
@@ -363,12 +363,15 @@ s.net("GND", "C1.2", "C2.2", "Y1.2")
 # The Winbond "...IQ" order codes ship with QE already fixed to 1, so boot2's 35h check
 # short-circuits and the offending write is never issued -- the bug class cannot occur.
 # This one is also a JLCPCB Basic part, so no extended-part fee and no stock roulette.
-s.place("U3", "Memory_Flash:W25Q128JVS", 355.6, 187.96, value="W25Q128JVSIQ",
+s.place("U3", "Memory_Flash:W25Q32JVSS", 355.6, 187.96, value="W25Q32JVSSIQ",
         footprint=FP["SOIC8"],
-        props={"MPN": "W25Q128JVSIQ", "Manufacturer": "Winbond", "LCSC": "C97521",
-               "Description": "16MB QSPI NOR flash, SOIC-8 208mil. QE fixed at 1 in "
-                              "silicon (IQ order code) so the stock RP2040 boot2 never "
-                              "issues its two-byte WRSR. JLCPCB Basic."})
+        props={"MPN": "W25Q32JVSSIQ", "Manufacturer": "Winbond", "LCSC": "C179173",
+               "Description": "4MB QSPI NOR flash, SOIC-8 208mil. The IQ order code "
+                              "fixes QE=1 in silicon, so the stock RP2040 boot2 finds "
+                              "the bit already set and never issues its two-byte WRSR. "
+                              "70k at LCSC and cheaper than the GigaDevice part. NOT "
+                              "W25Q80DV -- that is the older generation, USON-8, and is "
+                              "the part that is genuinely hard to source."})
 decouple("C12", 388.62, 187.96, "100n", "+3V3")
 s.net("+3V3", "U3.8")
 s.net("GND", "U3.4")

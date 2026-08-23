@@ -3314,7 +3314,7 @@
 			)
 			(embedded_fonts no)
 		)
-	(symbol "Memory_Flash:W25Q128JVS"
+	(symbol "Memory_Flash:W25Q32JVSS"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -3330,7 +3330,7 @@
 					)
 				)
 			)
-			(property "Value" "W25Q128JVS"
+			(property "Value" "W25Q32JVSS"
 				(at 7.62 11.43 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -3341,7 +3341,7 @@
 				)
 			)
 			(property "Footprint" "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm"
-				(at 0 22.86 0)
+				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(hide yes)
@@ -3351,8 +3351,8 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://www.winbond.com/resource-files/w25q128jv_dtr%20revc%2003272018%20plus.pdf"
-				(at 0 25.4 0)
+			(property "Datasheet" "http://www.winbond.com/resource-files/w25q32jv%20revg%2003272018%20plus.pdf"
+				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(hide yes)
@@ -3362,8 +3362,8 @@
 					)
 				)
 			)
-			(property "Description" "128Mbit / 16MiB Serial Flash Memory, Standard/Dual/Quad SPI, 2.7-3.6V, SOIC-8"
-				(at 0 27.94 0)
+			(property "Description" "32Mbit / 4MiB Serial Flash Memory, Standard/Dual/Quad SPI, 2.7-3.6V, SOIC-8 (208 mil)"
+				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(hide yes)
@@ -3373,7 +3373,7 @@
 					)
 				)
 			)
-			(property "ki_keywords" "flash memory SPI QPI DTR"
+			(property "ki_keywords" "flash memory SPI"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -3395,7 +3395,7 @@
 					)
 				)
 			)
-			(symbol "W25Q128JVS_0_1"
+			(symbol "W25Q32JVSS_0_1"
 				(rectangle
 					(start -7.62 10.16)
 					(end 10.16 -10.16)
@@ -3408,7 +3408,7 @@
 					)
 				)
 			)
-			(symbol "W25Q128JVS_1_1"
+			(symbol "W25Q32JVSS_1_1"
 				(pin input line
 					(at -10.16 7.62 0)
 					(length 2.54)
@@ -22066,7 +22066,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Memory_Flash:W25Q128JVS")
+		(lib_id "Memory_Flash:W25Q32JVSS")
 		(at 355.6 187.96 0)
 		(unit 1)
 		(body_style 1)
@@ -22087,7 +22087,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "W25Q128JVSIQ"
+		(property "Value" "W25Q32JVSSIQ"
 			(at 345.44 165.1 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -22110,7 +22110,7 @@
 				(justify left)
 			)
 		)
-		(property "Datasheet" "https://www.winbond.com/resource-files/w25q128jv_dtr%20revc%2003272018%20plus.pdf"
+		(property "Datasheet" "http://www.winbond.com/resource-files/w25q32jv%20revg%2003272018%20plus.pdf"
 			(at 355.6 187.96 0)
 			(hide yes)
 			(show_name no)
@@ -22122,7 +22122,7 @@
 				(justify left)
 			)
 		)
-		(property "Description" "16MB QSPI NOR flash, SOIC-8 208mil. QE fixed at 1 in silicon (IQ order code) so the stock RP2040 boot2 never issues its two-byte WRSR. JLCPCB Basic."
+		(property "Description" "4MB QSPI NOR flash, SOIC-8 208mil. The IQ order code fixes QE=1 in silicon, so the stock RP2040 boot2 finds the bit already set and never issues its two-byte WRSR. 70k at LCSC and cheaper than the GigaDevice part. NOT W25Q80DV -- that is the older generation, USON-8, and is the part that is genuinely hard to source."
 			(at 355.6 187.96 0)
 			(hide yes)
 			(show_name no)
@@ -22134,7 +22134,7 @@
 				(justify left)
 			)
 		)
-		(property "ki_keywords" "flash memory SPI QPI DTR"
+		(property "ki_keywords" "flash memory SPI"
 			(at 355.6 187.96 0)
 			(hide yes)
 			(show_name no)
@@ -22158,7 +22158,7 @@
 				(justify left)
 			)
 		)
-		(property "MPN" "W25Q128JVSIQ"
+		(property "MPN" "W25Q32JVSSIQ"
 			(at 355.6 187.96 0)
 			(hide yes)
 			(show_name no)
@@ -22182,7 +22182,7 @@
 				(justify left)
 			)
 		)
-		(property "LCSC" "C97521"
+		(property "LCSC" "C179173"
 			(at 355.6 187.96 0)
 			(hide yes)
 			(show_name no)
