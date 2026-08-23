@@ -1,0 +1,9 @@
+build/
+*-backups/
+.history/
+*.lck
+*.kicad_prl
+*~
+__pycache__/
+kicad-lib/vendor/
+kicad-lib/imported/*.pretty/

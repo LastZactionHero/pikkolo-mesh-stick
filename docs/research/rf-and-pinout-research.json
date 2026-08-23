@@ -1,0 +1,739 @@
+{
+  "summary": "Research authoritative pinout/topology facts for the Pikkolo RP2040+SX1262 mesh stick schematic",
+  "agentCount": 10,
+  "logs": [
+    "[stall] agent \"verify:usb-edge-esd\" stalled (no progress) after 2017s — retrying (1/5)",
+    "[stall] agent \"verify:sx1262-refdesign\" stalled (no progress) after 1974s — retrying (1/5)",
+    "[stall] agent \"verify:sk9822-led\" stalled (no progress) after 1912s — retrying (1/5)",
+    "[stall] agent \"verify:usb-edge-esd\" stalled (no progress) after 919s — retrying (2/5)",
+    "[stall] agent \"verify:sx1262-refdesign\" stalled (no progress) after 919s — retrying (2/5)",
+    "[stall] agent \"verify:sk9822-led\" stalled (no progress) after 919s — retrying (2/5)",
+    "[stall] agent \"verify:usb-edge-esd\" stalled (no progress) after 1007s — retrying (3/5)",
+    "[stall] agent \"verify:sx1262-refdesign\" stalled (no progress) after 1007s — retrying (3/5)",
+    "[stall] agent \"verify:sk9822-led\" stalled (no progress) after 1007s — retrying (3/5)",
+    "[stall] agent \"verify:sk9822-led\" stalled (no progress) after 907s — retrying (4/5)",
+    "[stall] agent \"verify:sx1262-refdesign\" stalled (no progress) after 907s — retrying (4/5)",
+    "[stall] agent \"verify:usb-edge-esd\" stalled (no progress) after 907s — retrying (4/5)",
+    "[stall] agent \"verify:sk9822-led\" stalled (no progress) after 1051s — retrying (5/5)",
+    "[stall] agent \"verify:sx1262-refdesign\" stalled (no progress) after 1051s — retrying (5/5)",
+    "[stall] agent \"verify:usb-edge-esd\" stalled (no progress) after 1051s — retrying (5/5)",
+    "pipeline[1] failed: agent stalled on all 6 attempts (no progress for 180000ms each)",
+    "pipeline[3] failed: agent stalled on all 6 attempts (no progress for 180000ms each)",
+    "pipeline[4] failed: agent stalled on all 6 attempts (no progress for 180000ms each)"
+  ],
+  "result": [
+    {
+      "topic": "meshtastic-variant",
+      "research": {
+        "topic": "Meshtastic firmware `rp2040-lora` (Waveshare RP2040-LoRa) variant — exact GPIO assignments, verified against upstream source",
+        "findings": [
+          {
+            "claim": "The variant is NOT at variants/rp2040-lora/ — it lives at variants/rp2040/rp2040-lora/, and consists of exactly two files: variant.h and platformio.ini. There is no variant.cpp.",
+            "detail": "Confirmed via GitHub contents API on meshtastic/firmware: variants/rp2040/ contains challenger_2040_lora, ec_catsniffer, feather_rp2040_rfm95, nibble_rp2040, rak11310, rp2040-lora, rp2040.ini, rpipico-slowclock, rpipico, rpipicow, seeed_xiao_rp2040, senselora_rp2040. variants/rp2040/rp2040-lora/ contains only platformio.ini and variant.h. Working raw URLs: https://raw.githubusercontent.com/meshtastic/firmware/master/variants/rp2040/rp2040-lora/variant.h and .../platformio.ini . The file is byte-identical on master and develop (md5 91a7a7edd360677aa987b046cc411873, checked against develop HEAD 05f6474, 2026-08-22).",
+            "source": "https://raw.githubusercontent.com/meshtastic/firmware/master/variants/rp2040/rp2040-lora/variant.h ; https://api.github.com/repos/meshtastic/firmware/contents/variants/rp2040/rp2040-lora",
+            "confidence": "high"
+          },
+          {
+            "claim": "LoRa SPI is on RP2040 hardware SPI1 (arduino-pico `SPI1` object), selected by -D HW_SPI1_DEVICE: SCK=GP14, MOSI=GP15, MISO=GP24, NSS/CS=GP13.",
+            "detail": "variant.h verbatim:\n```\n#undef LORA_SCK\n#undef LORA_MISO\n#undef LORA_MOSI\n#undef LORA_CS\n\n// https://www.waveshare.com/rp2040-lora.htm\n// https://www.waveshare.com/img/devkit/RP2040-LoRa-HF/RP2040-LoRa-HF-details-11.jpg\n#define LORA_SCK 14  // GPIO14\n#define LORA_MISO 24 // GPIO24\n#define LORA_MOSI 15 // GPIO15\n#define LORA_CS 13   // GPIO13\n```\nplatformio.ini build_flags include `-D HW_SPI1_DEVICE`. src/main.cpp (ARCH_RP2040 branch, ~line 970):\n```\n#ifdef HW_SPI1_DEVICE\n    SPI1.setSCK(LORA_SCK);\n    SPI1.setTX(LORA_MOSI);\n    SPI1.setRX(LORA_MISO);\n    pinMode(LORA_CS, OUTPUT);\n    digitalWrite(LORA_CS, HIGH);\n    SPI1.begin(false);\n```\nsrc/mesh/RadioInterface.cpp: `SPISettings loraSpiSettings(4000000, MSBFIRST, SPI_MODE0);` and `#elif defined(HW_SPI1_DEVICE) LockingArduinoHal *loraHal = new LockingArduinoHal(SPI1, loraSpiSettings);` → 4 MHz, MODE0, MSB-first. All four pins are legal RP2040 SPI1 pinmux functions (GP14=SPI1 SCK, GP15=SPI1 TX, GP24=SPI1 RX, GP13=SPI1 CSn), so this is a hardware-SPI-clean assignment on a custom RP2040 board.",
+            "source": "variants/rp2040/rp2040-lora/variant.h; variants/rp2040/rp2040-lora/platformio.ini; src/main.cpp; src/mesh/RadioInterface.cpp",
+            "confidence": "high"
+          },
+          {
+            "claim": "LoRa control pins: DIO1/IRQ=GP16, BUSY=GP18, RESET=GP23, DIO4=GP17 (RF-switch complement). DIO0, DIO2, DIO3 are RADIOLIB_NC (no MCU connection).",
+            "detail": "variant.h verbatim:\n```\n#define LORA_DIO0 RADIOLIB_NC // No GPIO connection\n#define LORA_RESET 23         // GPIO23\n#define LORA_BUSY 18          // GPIO18\n#define LORA_DIO1 16          // GPIO16\n#define LORA_DIO2 RADIOLIB_NC // Antenna switching, no GPIO connection\n#define LORA_DIO3 RADIOLIB_NC // No GPIO connection\n#define LORA_DIO4 17          // GPIO17\n```\nand:\n```\n#ifdef USE_SX1262\n#define SX126X_CS LORA_CS\n#define SX126X_DIO1 LORA_DIO1\n#define SX126X_BUSY LORA_BUSY\n#define SX126X_RESET LORA_RESET\n```\nNote GP23/GP24/GP25 are ordinary GPIOs on a bare RP2040 QFN-56 (they are only special on the Raspberry Pi Pico module), so this variant is directly usable on a custom board.",
+            "source": "variants/rp2040/rp2040-lora/variant.h",
+            "confidence": "high"
+          },
+          {
+            "claim": "RF switch: SX126X_DIO2_AS_RF_SWITCH IS defined (no value), AND GP17 is additionally driven as SX126X_RXEN. There is no SX126X_TXEN. This is exactly the PE4259 arrangement your BOM describes (ctrl = GP17).",
+            "detail": "variant.h verbatim:\n```\n// On rp2040-lora board the antenna switch is wired and works with complementary-pin control logic.\n// See PE4259 datasheet page 4\n...\n#define SX126X_DIO2_AS_RF_SWITCH // Antenna switch CTRL\n#define SX126X_RXEN LORA_DIO4    // Antenna switch !CTRL via GPIO17\n```\nBehavior in src/mesh/SX126xInterface.cpp: `#ifdef SX126X_DIO2_AS_RF_SWITCH bool dio2AsRfSwitch = true;` → `lora.setDio2AsRfSwitch(true)`. Then `#ifndef SX126X_TXEN #define SX126X_TXEN RADIOLIB_NC` and `lora.setRfSwitchPins(SX126X_RXEN, SX126X_TXEN);` → `setRfSwitchPins(17, RADIOLIB_NC)`. Net effect: SX1262 DIO2 drives PE4259 CTRL automatically (HIGH in TX), and RadioLib drives GP17 HIGH in RX / LOW in TX / LOW in IDLE, giving the complementary ¬CTRL. IMPORTANT: idle state leaves GP17 LOW, i.e. the switch parks in the TX path. Note SX126X_ANT_SW (a different, statically-HIGH define handled at SX126xInterface.cpp:~128) is NOT used here.",
+            "source": "variants/rp2040/rp2040-lora/variant.h; src/mesh/SX126xInterface.cpp lines 110-160",
+            "confidence": "high"
+          },
+          {
+            "claim": "SX126X_DIO3_TCXO_VOLTAGE is present but COMMENTED OUT — the stock rp2040-lora build runs the SX1262 in plain-XTAL mode with tcxoVoltage = 0. Your Y2 32 MHz TCXO powered from DIO3 at 1.8 V WILL NOT WORK on an unmodified rp2040-lora build.",
+            "detail": "variant.h verbatim, last line of the USE_SX1262 block:\n```\n// #define SX126X_DIO3_TCXO_VOLTAGE 1.8\n```\nIn src/mesh/SX126xInterface.cpp the member `tcxoVoltage` defaults to 0 when the macro is absent; the code logs `\"SX126X_DIO3_TCXO_VOLTAGE not defined, DIO3 not used as TCXO Vref\"` and calls `lora.begin(getFreq(), bw, sf, cr, syncWord, power, preambleLength, tcxoVoltage, useRegulatorLDO)` with tcxoVoltage=0. With 0, RadioLib never issues SetDIO3AsTCXOCtrl, DIO3 stays low, the TCXO is never powered, and the SX1262 either fails calibration or returns RADIOLIB_ERR_CHIP_NOT_FOUND / SPI_CMD_FAILED. For Pikkolo you MUST uncomment/define `#define SX126X_DIO3_TCXO_VOLTAGE 1.8` in your own variant.h.",
+            "source": "variants/rp2040/rp2040-lora/variant.h; src/mesh/SX126xInterface.cpp lines 73-95",
+            "confidence": "high"
+          },
+          {
+            "claim": "There is NO user button. BUTTON_PIN is explicitly defined as -1, precisely because GP17 was taken by the antenna switch.",
+            "detail": "variant.h verbatim:\n```\n#define BUTTON_PIN -1 // Pin 17 used for antenna switching via DIO4\n```\nBecause the macro is still *defined*, every `#if defined(BUTTON_PIN)` block still compiles. In src/input/InputBroker.cpp:\n```\nint _pinNum = config.device.button_gpio ? config.device.button_gpio : BUTTON_PIN;\n```\nand `userConfig.pinNumber = (uint8_t)_pinNum;` → -1 casts to 255 (a non-existent pin) unless the runtime setting `config.device.button_gpio` is non-zero. So a Pikkolo SW1 user button on a free GPIO can be made to work either by writing your own variant.h with a real BUTTON_PIN, or at runtime by setting device.button_gpio. Defaults if you define BUTTON_PIN: BUTTON_ACTIVE_LOW=true, BUTTON_ACTIVE_PULLUP=true (src/input/InputBroker.cpp ~line 358), i.e. button to GND with internal pull-up.",
+            "source": "variants/rp2040/rp2040-lora/variant.h; src/input/InputBroker.cpp lines 173-400",
+            "confidence": "high"
+          },
+          {
+            "claim": "The LED is a PLAIN single-GPIO LED on GP25, used only as a power indicator. There is NO addressable LED, NO HAS_RGB_LED, NO RGBLED_* and NO NEOPIXEL_* define in this variant.",
+            "detail": "variant.h verbatim: `#define LED_POWER PIN_LED`. `PIN_LED` comes from the arduino-pico board definition selected in platformio.ini (`board = rpipico`): arduino-pico 5.4.4 variants/rpipico/pins_arduino.h has `#define PIN_LED (25u)`. So LED_POWER = GPIO25, active-high (src/configuration.h: `#ifndef LED_STATE_ON` / `#define LED_STATE_ON 1`). It is used in src/main.cpp only at setup (`pinMode(LED_POWER, OUTPUT); digitalWrite(LED_POWER, LED_STATE_ON);`) and as a 3-flash low-power warning in waitUntilPowerLevelSafe(). No LED_PIN, LED_NOTIFICATION, LED_LORA, WIFI_LED, HAS_NEOPIXEL, NEOPIXEL_DATA/COUNT/TYPE, RGBLED_RED/GREEN/BLUE, HAS_NCP5623 or HAS_LP5562 anywhere in this variant, so src/configuration.h:520 never sets HAS_RGB_LED for this board.",
+            "source": "variants/rp2040/rp2040-lora/variant.h; https://raw.githubusercontent.com/earlephilhower/arduino-pico/5.4.4/variants/rpipico/pins_arduino.h; src/configuration.h:520-528; src/main.cpp:335-380",
+            "confidence": "high"
+          },
+          {
+            "claim": "BLOCKER for D1: Meshtastic firmware has NO SK9822 / APA102 driver anywhere in src/. The only addressable-LED support is single-wire NeoPixel/WS2812 via Adafruit_NeoPixel, plus I2C NCP5623 / LP5562 and 3-pin PWM RGB.",
+            "detail": "`grep -rn 'SK9822|APA102|DotStar' src/ variants/` over the whole repo returns exactly two hits, both in an unrelated ESP32 variant's build file: variants/esp32/wiphone/platformio.ini lines 17-18 (`pololu/APA102@3.0.0`). Nothing in src/. src/configuration.h:520 gates RGB on: `#if defined(HAS_NCP5623) || defined(HAS_LP5562) || defined(RGBLED_RED) || defined(HAS_NEOPIXEL) || defined(UNPHONE)`. src/AmbientLightingThread.h:43 is `Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_DATA, NEOPIXEL_TYPE);` — one DATA pin, no clock pin. An SK9822 (2-wire DATA+CLK, APA102 protocol) on D1 therefore needs custom firmware work: either a new driver in AmbientLightingThread, or you drop the SK9822 in favor of a WS2812-family part (single DATA pin, works with HAS_NEOPIXEL + NEOPIXEL_DATA/NEOPIXEL_COUNT/NEOPIXEL_TYPE out of the box).",
+            "source": "grep over meshtastic/firmware develop HEAD 05f6474 (src/ and variants/); src/configuration.h; src/AmbientLightingThread.h",
+            "confidence": "high"
+          },
+          {
+            "claim": "SX126X_MAX_POWER is NOT defined in this variant, so it falls back to the firmware default of 22 dBm. No TX_GAIN_LORA either.",
+            "detail": "src/mesh/SX126xInterface.cpp lines 17-23 verbatim:\n```\n// Particular boards might define a different max power based on what their hardware can do, default to max power output if not\n// specified (may be dangerous if using external PA and SX126x power config forgotten)\n#if ARCH_PORTDUINO\n#define SX126X_MAX_POWER portduino_config.sx126x_max_power\n#endif\n#ifndef SX126X_MAX_POWER\n#define SX126X_MAX_POWER 22\n#endif\n```\nApplied at `limitPower(SX126X_MAX_POWER);`. Also `float currentLimit = 140; // Higher OCP limit for SX126x PA` (src/mesh/SX126xInterface.h:37) → OCP set to 140 mA, and `bool useRegulatorLDO = false;` → SX1262 DC-DC (SMPS) mode is used, so your DCC_SW inductor is required. For a bare SX1262 with no PA, 22 dBm is correct.",
+            "source": "src/mesh/SX126xInterface.cpp lines 17-23, 89, 106; src/mesh/SX126xInterface.h:37",
+            "confidence": "high"
+          },
+          {
+            "claim": "Other pin-constraining defines in the variant: EXT_NOTIFY_OUT = GP22, HAS_CPU_SHUTDOWN = 1, USE_SX1262. Battery ADC is commented out.",
+            "detail": "variant.h verbatim:\n```\n#define EXT_NOTIFY_OUT 22\n...\n// #define BATTERY_PIN 26\n//  ratio of voltage divider = 3.0 (R17=200k, R18=100k)\n// #define ADC_MULTIPLIER 3.1 // 3.0 + a bit for being optimistic\n\n#define HAS_CPU_SHUTDOWN 1\n#define USE_SX1262\n```\nEXT_NOTIFY_OUT becomes EXTERNAL_NOTIFICATION_MODULE_OUTPUT (src/modules/ExternalNotificationModule.cpp:54-55), i.e. GP22 is claimed as the buzzer/notify output. Also non-normative comments in the file: default I2C is SDA=GP4 / SCL=GP5 (Wire0), and SerialModule is recommended on txd=GP8 / rxd=GP9 (Serial2). There is no ARDUINO_ARCH define trickery beyond a stray `#define ARDUINO_ARCH_AVR` at the top of the file.",
+            "source": "variants/rp2040/rp2040-lora/variant.h; src/modules/ExternalNotificationModule.cpp:54",
+            "confidence": "high"
+          },
+          {
+            "claim": "Full GPIO occupancy of the stock rp2040-lora variant: GP13,14,15,16,17,18,22,23,24,25 are taken. GP0-12, 19, 20, 21, 26-29 are free for Pikkolo's SW1, SK9822 DATA/CLK, etc.",
+            "detail": "Taken: GP13 LORA_CS, GP14 LORA_SCK, GP15 LORA_MOSI, GP16 LORA_DIO1, GP17 SX126X_RXEN (PE4259 ¬CTRL), GP18 LORA_BUSY, GP22 EXT_NOTIFY_OUT, GP23 LORA_RESET, GP24 LORA_MISO, GP25 LED_POWER. Soft-reserved by convention in the file's comments: GP4/GP5 (I2C0), GP8/GP9 (Serial2), GP26 (commented BATTERY_PIN). INFERRED from those defines: free GPIOs are 0,1,2,3,6,7,10,11,12,19,20,21,27,28,29 after honoring the comment reservations, or 0-12 + 19,20,21,26-29 if you ignore them. Your SW2/BOOTSEL does not consume a GPIO — on RP2040 BOOTSEL is a pull-down on the QSPI_SS line of U3, and the firmware enters DFU in software via `reset_usb_boot(0, 0)` (src/platform/rp2xx0/main-rp2xx0.cpp:158). USB D+/D- are dedicated RP2040 pins, not GPIOs, so the edge fingers cost nothing here.",
+            "source": "variants/rp2040/rp2040-lora/variant.h; src/platform/rp2xx0/main-rp2xx0.cpp:146-160",
+            "confidence": "high"
+          },
+          {
+            "claim": "platformio.ini pins board = rpipico, which caps usable flash at 2 MB and carves a 512 KB LittleFS — your 4 MB GD25Q32E will be half-wasted unless you override it.",
+            "detail": "variants/rp2040/rp2040-lora/platformio.ini verbatim:\n```\n[env:rp2040-lora]\ncustom_meshtastic_hw_model = 30\ncustom_meshtastic_hw_model_slug = RP2040_LORA\ncustom_meshtastic_architecture = rp2040\ncustom_meshtastic_actively_supported = true\ncustom_meshtastic_support_level = 2\ncustom_meshtastic_display_name = RP2040 LoRa\ncustom_meshtastic_tags = Waveshare\ncustom_meshtastic_requires_dfu = true\n\nextends = rp2040_base\nboard = rpipico\nupload_protocol = picotool\nbuild_flags =\n  ${rp2040_base.build_flags}\n  -D RP2040_LORA\n  -I variants/rp2040/rp2040-lora\n  -D DEBUG_RP2040_PORT=Serial\n  -D HW_SPI1_DEVICE\n```\nvariants/rp2040/rp2040.ini [rp2040_base]: arduino-pico core 5.4.4 (earlephilhower), `board_build.core = earlephilhower`, `board_build.filesystem_size = 0.5m`, `-D__PLAT_RP2040__ -D__FREERTOS=1`. arduino-pico 5.4.4 boards.txt: `rpipico.upload.maximum_size=2097152` and `rpipico.build.boot2=boot2_w25q080_2_padded_checksum`. The w25q080 boot2 is the standard generic-QSPI (EBh quad read, SR2 QE bit via 31h) stage-2 and is compatible with the GD25Q32E, so the part choice is fine — but you get 2 MB visible, of which 512 KB is LittleFS. Override board_upload.maximum_size / use a 4 MB board def if you want the whole chip.",
+            "source": "variants/rp2040/rp2040-lora/platformio.ini; variants/rp2040/rp2040.ini; https://raw.githubusercontent.com/earlephilhower/arduino-pico/5.4.4/boards.txt",
+            "confidence": "high"
+          },
+          {
+            "claim": "Cloning this variant makes the device report as HardwareModel 30 / RP2040_LORA (Waveshare RP2040 LoRa) to apps and the mesh.",
+            "detail": "platformio.ini: `custom_meshtastic_hw_model = 30`, `custom_meshtastic_hw_model_slug = RP2040_LORA`, `custom_meshtastic_display_name = RP2040 LoRa`, `custom_meshtastic_tags = Waveshare`, `custom_meshtastic_requires_dfu = true`. src/platform/rp2xx0/architecture.h: `#elif defined(RP2040_LORA)` → `#define HW_VENDOR meshtastic_HardwareModel_RP2040_LORA`. If Pikkolo ships as its own product you would request a new hw_model id rather than reusing 30. Arch defaults from that same header that apply to you: HAS_BUTTON 1, HAS_TELEMETRY 1, HAS_SCREEN 1, HAS_WIRE 1, HAS_SENSOR 1, HAS_RADIO 1.",
+            "source": "variants/rp2040/rp2040-lora/platformio.ini; src/platform/rp2xx0/architecture.h",
+            "confidence": "high"
+          },
+          {
+            "claim": "Deep sleep on RP2040 uses xosc_dormant(), which stops the 12 MHz crystal — relevant to Y1 selection and to any expectation of low-power operation on a USB-powered stick.",
+            "detail": "src/platform/rp2xx0/main-rp2xx0.cpp: the non-RP2040_SLOW_CLOCK path is `void cpuDeepSleep(uint32_t msecs) { /* Set RP2040 in dormant mode. Will not wake up. */ xosc_dormant(); }`. The RP2040_SLOW_CLOCK path uses `sleep_run_from_dormant_source(DORMANT_SOURCE_ROSC)` then `rp2040.reboot()`. Also `rp2040Loop()` runs `watchdog_enable(8000, true)` — an 8 s hardware watchdog is armed on every boot, so any blocking >8 s in custom code reboots the stick.",
+            "source": "src/platform/rp2xx0/main-rp2xx0.cpp lines 55-80, 146-160",
+            "confidence": "high"
+          }
+        ],
+        "open_questions": [
+          "Does Pikkolo's PE4259 use complementary control (DIO2 -> CTRL and GP17 -> the second control input) like the Waveshare board, or a single CTRL pin from GP17 only? The stock variant defines BOTH SX126X_DIO2_AS_RF_SWITCH and SX126X_RXEN=GP17. If your U4 has only one control pin wired to GP17, you must decide which one drives it: either drop SX126X_DIO2_AS_RF_SWITCH and keep SX126X_RXEN=17 (RadioLib gives GP17 HIGH in RX, LOW in TX and LOW in idle), or route DIO2 to CTRL and drop SX126X_RXEN. Getting this wrong silently routes TX into the wrong RF port. Confirm the PE4259-63 control-pin count on your schematic against the BOM's 'ctrl = GP17'.",
+          "Note the idle-state behavior: with SX126X_RXEN=17 and no TXEN, RadioLib drives GP17 LOW in MODE_IDLE, the same state as TX. Verify that the resulting parked RF path is acceptable for your RA/RB antenna-select topology.",
+          "The TCXO define is commented out upstream, implying the Waveshare RP2040-LoRa uses a plain crystal on the SX1262. I could not confirm this from Waveshare directly (waveshare.com/wiki/RP2040-LoRa returned HTTP 403 to WebFetch). Regardless, Pikkolo's Y2 32 MHz TCXO powered from DIO3 at 1.8 V requires you to define SX126X_DIO3_TCXO_VOLTAGE 1.8 in your own variant.h — this is the single most likely cause of a dead radio if you flash the stock rp2040-lora build.",
+          "D1 (SK9822-EC20) has no upstream driver. Decide now: (a) swap to a WS2812-family single-wire part and use HAS_NEOPIXEL + NEOPIXEL_DATA/NEOPIXEL_COUNT/NEOPIXEL_TYPE, (b) write an APA102/SK9822 driver into AmbientLightingThread.h, or (c) drive it as a dumb status LED outside the RGB framework. Also confirm which two free GPIOs carry SK9822 DATA and CLK, since the stock variant assigns none.",
+          "SW1 (user button) needs a GPIO assignment — the stock variant is BUTTON_PIN -1. Pick a free pin (GP0-12, 19-21, 26-29) and define BUTTON_PIN in a Pikkolo-specific variant.h; defaults are active-low with internal pull-up.",
+          "LED_POWER resolves to GP25 only because platformio.ini says board = rpipico. If Pikkolo has no LED on GP25, either leave the define (harmless, drives an unconnected pin) or remove it. Confirm nothing else on your board uses GP25.",
+          "Will Pikkolo ship as its own hardware model, or reuse hw_model 30 / RP2040_LORA? Reusing 30 means every app and every node on the mesh identifies the stick as a Waveshare RP2040 LoRa.",
+          "Do you want the full 4 MB of the GD25Q32E? board = rpipico caps at 2 MB (upload.maximum_size=2097152) with 512 KB of that as LittleFS. A custom board definition or a board_upload.maximum_size override is needed to use the whole part.",
+          "EXT_NOTIFY_OUT = GP22 is claimed by the stock variant for a buzzer/notify output that Pikkolo does not have. Consider removing it so GP22 is available."
+        ]
+      },
+      "verdict": {
+        "corrections": [
+          "PE4259 CONTROL PIN MAPPING (board-spin class error). Finding 4 states the upstream arrangement is 'exactly the PE4259 arrangement your BOM describes (ctrl = GP17)'. It is not. Per the PE4259 datasheet (pSemi DOC-03694-5.01, Table 7, p.11): pin 1 = RF1, pin 2 = GND, pin 3 = RF2, pin 4 = CTRL, pin 5 = RFC, pin 6 = /CTRL-or-VDD. In the upstream rp2040-lora design the SX1262's DIO2 drives pin 4 (CTRL) -- variant.h comments it 'Antenna switch CTRL' -- and GP17 drives pin 6 (/CTRL) -- variant.h comments it 'Antenna switch !CTRL via GPIO17'. So GP17 is the COMPLEMENT input on pin 6, not CTRL on pin 4. If the Pikkolo schematic routes GP17 to pin 4 and ties pin 6 to 3V3 (single-pin mode), the stock defines are wrong for that board: SX126X_DIO2_AS_RF_SWITCH must be removed and DIO2 left unconnected, otherwise nothing drives the switch correctly.",
+          "PE4259 RF PATH DIRECTION. Per datasheet Table 6 (complementary-pin truth table, p.5): pin 6 Low + CTRL High -> RFC to RF1; pin 6 High + CTRL Low -> RFC to RF2. Combined with SX1262 DIO2 = HIGH in TX and RadioLib driving GP17 HIGH in RX: TX routes RFC->RF1 and RX routes RFC->RF2. The findings never state which RF port is TX and which is RX; get this backwards on the schematic and TX goes into the LNA/dead port.",
+          "PE4259 IDLE STATE. Finding 4's detail claims 'idle state leaves GP17 LOW, i.e. the switch parks in the TX path.' Unsupported. In complementary-pin mode pin 6 IS the device's only supply (datasheet Table 7: 'Bypassing on this pin is not required in this mode'). RadioLib's MODE_IDLE row is {rxEn LOW, txEn LOW} and DIO2 is also low in idle, so both pin 4 and pin 6 sit at 0 V -- the part is unpowered and the RF path is UNDEFINED, not 'the TX path'. Neither Table 5 nor Table 6 covers CTRL=0 with pin6=0.",
+          "PE4259 DATASHEET PAGE. The variant.h comment 'See PE4259 datasheet page 4' refers to an older revision. In the current revision (DOC-03694-5.01, 07/2026) the single-pin and complementary-pin truth tables (Tables 5 and 6) are on page 5; page 4 is thermal data.",
+          "RP2040 DEEP SLEEP (Finding 14 is wrong). src/platform/rp2xx0/main-rp2xx0.cpp gates cpuDeepSleep on '#ifdef __PLAT_RP2040__', NOT on RP2040_SLOW_CLOCK. variants/rp2040/rp2040.ini defines -D__PLAT_RP2040__ for every rp2040 build, so the rp2040-lora build uses the FIRST branch: rtc_init() -> sleep_run_from_dormant_source(DORMANT_SOURCE_ROSC) -> sleep_goto_sleep_until(&t_alarm, &sleep_callback) -> rp2040.reboot(). The xosc_dormant() call inside that branch is COMMENTED OUT (line 67). The bare 'xosc_dormant()' version lives only in the #else branch (non-__PLAT_RP2040__). RP2040_SLOW_CLOCK gates only clock-rate logging in rp2040Setup() and initVariant().",
+          "NO 8-SECOND WATCHDOG. Finding 14 claims 'rp2040Loop() runs watchdog_enable(8000, true) -- an 8 s hardware watchdog is armed on every boot'. A recursive grep over the entire meshtastic/firmware master tree returns ZERO hits for 'watchdog_enable', 'watchdog_update', or 'rp2040Loop'. No such function and no such watchdog exists. Do not design around it.",
+          "BOOT2 STATUS-REGISTER COMMAND. Finding 12's detail says the w25q080 boot2 sets 'SR2 QE bit via 31h'. pico-sdk boot2_w25q080.S does the opposite and says so explicitly in a source comment: 'We do a two-byte write to SR1 (01h cmd) rather than a one-byte write to SR2 (31h cmd) as the latter command isn't supported by W25Q080.' It defines CMD_READ_STATUS2 0x35, CMD_WRITE_STATUS 0x01, SREG_DATA 0x02, and sends 01h + 0x00 + 0x02 (three bytes total).",
+          "GD25Q32E / BOOT2 COMPATIBILITY IS NOT ESTABLISHED (fabrication risk). GD25Q32E datasheet Rev1.5 Table 10 lists '01H  S7-S0' as a ONE-data-byte command, and section 7.4 states: 'CS# must be driven high after the eighth bit of the data byte has been latched in. Otherwise, the Write Status Register (WRSR) command is not executed.' boot2_w25q080 sends 01h followed by TWO data bytes, so on a GD25Q32E that write is rejected and the QE bit (S9, bit 1 of SR2 -- confirmed as the correct bit) is never set. Since the same boot2 then configures EBh Quad I/O Fast Read, which per section 7.11 requires QE=1, a factory-fresh GD25Q32E (QE defaults to 0) may fail to XIP-boot with the stock 'board = rpipico' boot2. Either verify on the bench, use board_build.boot2 = boot2_generic_03h, or pre-program QE. The correct QE-setting command for this part is 31h with a single data byte.",
+          "variants/rp2040/ DIRECTORY LISTING. Finding 1's detail lists 12 entries including 'seeed_xiao_rp2040'. The actual directory holds 11 entries and seeed_xiao_rp2040 is NOT among them: challenger_2040_lora, ec_catsniffer, feather_rp2040_rfm95, nibble_rp2040, rak11310, rp2040-lora, rp2040.ini, rpipico, rpipico-slowclock, rpipicow, senselora_rp2040. (The headline claim -- the variant lives at variants/rp2040/rp2040-lora/ with exactly platformio.ini + variant.h and no variant.cpp -- is correct; variants/rp2040-lora/variant.h returns HTTP 404.)",
+          "LED_POWER (GP25) IS NOT WRITE-ONCE. Finding 7's detail says LED_POWER 'is used in src/main.cpp only at setup ... and as a 3-flash low-power warning'. src/modules/StatusLEDModule.cpp also drives it: 'digitalWrite(LED_POWER, CHARGE_LED_state)' at ~line 238 and inside setPowerLED() at ~line 291. statusLEDModule is instantiated unconditionally (src/modules/Modules.cpp:119) and PowerFSM.cpp (lines 109/117/152) and sleep.cpp:282 call setPowerLED(). GP25 is therefore actively toggled at runtime -- if Pikkolo puts anything other than an LED on GP25, it will be driven.",
+          "LINE-NUMBER CITATIONS ARE UNRELIABLE (content verified, locations wrong). src/configuration.h: HAS_RGB_LED gate is at 469-471 and LED_STATE_ON at 473-475, NOT 520-528. src/mesh/SX126xInterface.cpp: the SX126X_ANT_SW block is at ~line 46, NOT ~128. src/modules/ExternalNotificationModule.cpp: EXT_NOTIFY_OUT -> EXTERNAL_NOTIFICATION_MODULE_OUTPUT is at 49-50, NOT 54-55. src/platform/rp2xx0/main-rp2xx0.cpp: reset_usb_boot(0,0) is at line 133, NOT 158. src/input/InputBroker.cpp: the _pinNum / BUTTON_ACTIVE_LOW block is at 297-318, NOT '173-400' / '~358'. src/mesh/SX126xInterface.h:37 for currentLimit = 140 is correct.",
+          "LOG STRING QUOTED INEXACTLY. The actual string is 'SX126X_DIO3_TCXO_VOLTAGE not defined, not using DIO3 as TCXO reference voltage', not '... DIO3 not used as TCXO Vref'. Immaterial to the conclusion, but the finding presents it as a quote."
+        ],
+        "overall": "I fetched and read every primary source myself: variants/rp2040/rp2040-lora/{variant.h,platformio.ini} from both master and develop (md5 91a7a7edd360677aa987b046cc411873, byte-identical, and variants/rp2040-lora/ returns 404); a full tarball of meshtastic/firmware master for src/ greps; RadioLib at the exact pinned commit 510e00cfb05bbc3c2b7b524262785454944adb6e; arduino-pico 5.4.4 boards.txt / pins_arduino.h / SPI.cpp; the RP2040 datasheet PDF (642 pp.); pico-sdk boot2_w25q080.S; the pSemi PE4259 datasheet (DOC-03694-5.01); and the GigaDevice GD25Q32E datasheet Rev1.5.\n\nVERDICT: 12 CONFIRMED, 2 REFUTED. The GPIO numbers themselves are all correct -- GP13/14/15/24 SPI1, GP16 DIO1, GP17 DIO4, GP18 BUSY, GP22 EXT_NOTIFY, GP23 RESET, GP25 LED -- and I confirmed each against the RP2040 pinmux table and arduino-pico's own pin-validity bitsets, so the researcher did not fabricate any pin assignment. What is wrong is dangerous in a different way: two claims that read as hardware guidance are not supported by the hardware datasheets.\n\nTHE ONE THAT COSTS A BOARD SPIN: Finding 4 asserts the upstream design is \"exactly the PE4259 arrangement your BOM describes (ctrl = GP17)\". It is not. GP17 drives PE4259 PIN 6 (/CTRL), while PIN 4 (CTRL) is driven by the SX1262's DIO2 -- variant.h says so in its own comments, and the PE4259 pin table confirms pin 4 = CTRL, pin 6 = /CTRL-or-VDD. Your BOM line \"ctrl = GP17\" describes a DIFFERENT topology (single-pin mode). Before fabrication you must resolve which of these U4 is actually wired for, because the two are mutually exclusive: in single-pin mode pin 6 is a supply and needs a decoupling cap; in complementary mode pin 6 must NOT be tied to a rail and needs no bypass. Related and also unverified in the findings: with the upstream complementary wiring, TX (DIO2 high, GP17 low) selects RFC->RF1 and RX selects RFC->RF2. Confirm which of your RF1/RF2 goes to the RA/RB antenna-select node and which is the dead/terminated port. And the \"idle parks in TX\" reassurance is false -- in complementary mode idle leaves the PE4259 with 0 V on its only supply pin, an undefined RF path.\n\nTHE OTHER REFUTATION: Finding 14's deep-sleep description is inverted. Because rp2040.ini defines __PLAT_RP2040__, this build uses the RTC + sleep_run_from_dormant_source(DORMANT_SOURCE_ROSC) + reboot path; the xosc_dormant() line in that branch is commented out. And the \"8 s hardware watchdog armed on every boot\" does not exist anywhere in the repo -- zero grep hits for watchdog_enable or rp2040Loop.\n\nONE MORE FABRICATION-ADJACENT RISK the findings got backwards: the stock boot2 does NOT use 31h. It sends 01h with two data bytes, and the GD25Q32E datasheet section 7.4 says a WRSR whose data is not exactly one byte \"is not executed\" -- so the QE bit may never get set on a virgin GD25Q32E, and EBh quad XIP then fails. The part choice is electrically fine, but \"compatible, so the part choice is fine\" is not established. Plan to bench-verify or switch to boot2_generic_03h.\n\nTwo supporting facts I confirmed that the findings did not mention and that matter for this specific board: the RP2040 datasheet states \"The USB bootloader requires a 12MHz crystal or 12MHz clock input\" (so Y1 at 12 MHz is mandatory, not merely conventional), and Table 1 states \"A 27 ohm series termination resistor is required on each pin\" for USB_DM/USB_DP -- worth an explicit check since you have edge fingers and no USB connector part on the BOM. I also confirmed the BOOTSEL claim directly: RP2040 datasheet section 2.8.1 reads \"Check if SPI CS pin is tied low ('bootrom button'), and skip flash boot if so\", so SW2 on QSPI_SS costs no GPIO.\n\nI could not reach any Waveshare primary source (waveshare.com/wiki/RP2040-LoRa returns 403 to both WebFetch and curl; I tried three plausible schematic PDF paths, all 404). So the reference board's actual PE4259 wiring and its XTAL-vs-TCXO choice remain unconfirmed from Waveshare directly -- but variant.h's own comments plus the PE4259 datasheet are sufficient to establish the firmware's intended mapping.\n\nWorking files (all absolute): /private/tmp/claude-501/-Users-zach-dev-mesh/b7abdacf-f144-4aa7-a127-8ddf4b7b0b0c/scratchpad/variant.h, .../pio.ini, .../firmware-master/ (full master tree), .../rp2040.pdf, .../pe4259.pdf, .../gd25q32e.pdf, .../boot2b.S, .../Module.cpp, .../SX126x.cpp, .../apSPI.cpp",
+        "verdicts": [
+          {
+            "claim": "The variant is at variants/rp2040/rp2040-lora/ (not variants/rp2040-lora/), containing exactly variant.h and platformio.ini, no variant.cpp; byte-identical on master and develop, md5 91a7a7edd360677aa987b046cc411873.",
+            "status": "CONFIRMED",
+            "note": "Verified directly. GitHub contents API on variants/rp2040/rp2040-lora returns exactly two entries (platformio.ini sha 9d7520b1..., variant.h sha 51a760e0...). I downloaded variant.h from both refs/heads/master and refs/heads/develop: md5 is 91a7a7edd360677aa987b046cc411873 on both and diff is empty. https://raw.githubusercontent.com/meshtastic/firmware/master/variants/rp2040-lora/variant.h returns HTTP 404, confirming the path correction. ONE DETAIL ERROR: the detail's listing of variants/rp2040/ names 12 entries including 'seeed_xiao_rp2040'; the actual directory has 11 and does not contain it. Does not affect the claim."
+          },
+          {
+            "claim": "LoRa SPI is on RP2040 hardware SPI1 via -D HW_SPI1_DEVICE: SCK=GP14, MOSI=GP15, MISO=GP24, NSS/CS=GP13; 4 MHz, MODE0, MSB-first; all four are legal SPI1 pinmux functions.",
+            "status": "CONFIRMED",
+            "note": "Every element independently verified. variant.h quote is exact (including the four #undefs and the two Waveshare URLs). platformio.ini contains '-D HW_SPI1_DEVICE'. src/main.cpp lines 824-831 match the quoted SPI1.setSCK/setTX/setRX + manual CS block verbatim. src/mesh/RadioInterface.cpp:246 'SPISettings loraSpiSettings(4000000, MSBFIRST, SPI_MODE0);' and :302 'LockingArduinoHal *loraHal = new LockingArduinoHal(SPI1, loraSpiSettings);'. Pinmux checked against the RP2040 datasheet Table 2 (PDF p.13-14): GP13=SPI1 CSn, GP14=SPI1 SCK, GP15=SPI1 TX, GP24=SPI1 RX -- all correct. Cross-checked against arduino-pico 5.4.4 libraries/SPI/src/SPI.cpp, whose SPI1 valid-pin bitsets are setSCK{10,14,26}, setTX{11,15,27}, setRX{8,12,24,28}, setCS{9,13,25,29}; GP14/15/24 are all accepted, so SPI1.begin() will not silently fail. Nuance not in the finding: CS is bit-banged through SIO (pinMode/digitalWrite), the SPI1 hardware CSn function is never selected -- GP13 happens to also be a legal CSn pin but does not need to be."
+          },
+          {
+            "claim": "LoRa control pins: DIO1/IRQ=GP16, BUSY=GP18, RESET=GP23, DIO4=GP17; DIO0, DIO2, DIO3 are RADIOLIB_NC. GP23/24/25 are ordinary GPIOs on a bare RP2040 QFN-56.",
+            "status": "CONFIRMED",
+            "note": "variant.h quoted verbatim and correct, including the SX126X_CS / SX126X_DIO1 / SX126X_BUSY / SX126X_RESET aliasing inside the #ifdef USE_SX1262 block. The bare-silicon claim is confirmed from the RP2040 datasheet: section 1.2 states '30 multifunction GPIO' and Table 2 lists GPIO 0-29 uniformly in Bank 0 with no special-casing of 23/24/25 (those are Raspberry Pi Pico MODULE conventions: SMPS mode, VBUS sense, LED). Section 2.19.1 confirms 'the User bank (GPIO0 to GPIO29) for the programmer to use'. Safe to use all three on a custom board."
+          },
+          {
+            "claim": "RF switch: SX126X_DIO2_AS_RF_SWITCH is defined with no value AND GP17 is driven as SX126X_RXEN; no SX126X_TXEN. 'This is exactly the PE4259 arrangement your BOM describes (ctrl = GP17).'",
+            "status": "REFUTED",
+            "note": "The FIRMWARE half is fully confirmed: variant.h has bare '#define SX126X_DIO2_AS_RF_SWITCH' and '#define SX126X_RXEN LORA_DIO4' with no SX126X_TXEN; SX126xInterface.cpp sets dio2AsRfSwitch=true, defaults SX126X_TXEN to RADIOLIB_NC, and calls setRfSwitchPins(17, RADIOLIB_NC). RadioLib at the pinned commit (Module.cpp:503-517) confirms the pin-state table exactly: {MODE_IDLE, LOW/LOW}, {MODE_RX, HIGH/LOW}, {MODE_TX, LOW/HIGH} with pins[]={rxEn,txEn} -- so GP17 is HIGH in RX, LOW in TX, LOW in IDLE. SX126X_ANT_SW is indeed unused. BUT the hardware equivalence in the claim's last sentence is wrong and is exactly the class of error that costs a board spin: per PE4259 datasheet Table 7 (p.11), pin 4 = CTRL and pin 6 = /CTRL-or-VDD, and variant.h's own comments assign DIO2 to CTRL and GP17 to !CTRL. GP17 therefore drives PIN 6, not the CTRL pin. A BOM that says 'ctrl = GP17' describes single-pin mode, which is NOT what this variant implements. Additionally the detail's 'idle parks in the TX path' is unsupported -- see corrections."
+          },
+          {
+            "claim": "SX126X_DIO3_TCXO_VOLTAGE is present but COMMENTED OUT; the stock build runs tcxoVoltage = 0 and never issues SetDIO3AsTCXOCtrl, so a DIO3-powered 1.8 V TCXO will not work unmodified.",
+            "status": "CONFIRMED",
+            "note": "Verified end to end. variant.h's last line inside the USE_SX1262 block is exactly '// #define SX126X_DIO3_TCXO_VOLTAGE 1.8'. src/mesh/SX126xInterface.h:38 declares 'float tcxoVoltage = 0.0;' with no other initializer reachable for this build (the 'float tcxoVoltage = SX126X_DIO3_TCXO_VOLTAGE;' at src/main.cpp:159 is gated on TCXO_OPTIONAL, which this variant does not define). SX126xInterface.cpp logs the zero case and passes tcxoVoltage into lora.begin(...). I confirmed the RadioLib side at the pinned commit: SX126x.cpp:1430 'if(this->tcxoVoltage > 0.0f) { state = setTCXO(this->tcxoVoltage); }' -- with 0 the TCXO control command is never sent and DIO3 stays low. The conclusion is sound. Two nits: the log string is quoted inexactly (see corrections), and the specific failure code (CHIP_NOT_FOUND / SPI_CMD_FAILED) is an inference -- notably RadioLib has a fallback for the OPPOSITE error (TCXO configured on an XTAL board, SX126x.cpp:1446-1452) but none for a TCXO board left unconfigured, so a dead radio is the expected outcome."
+          },
+          {
+            "claim": "There is NO user button: BUTTON_PIN is defined as -1 because GP17 was taken by the antenna switch; the macro stays defined so #if defined(BUTTON_PIN) blocks compile, and -1 casts to 255. Defaults are BUTTON_ACTIVE_LOW/PULLUP = true.",
+            "status": "CONFIRMED",
+            "note": "variant.h line is exact: '#define BUTTON_PIN -1 // Pin 17 used for antenna switching via DIO4'. src/input/InputBroker.cpp:297-318 confirms the mechanism: the block is under '#if defined(BUTTON_PIN)', line 301 is 'int _pinNum = config.device.button_gpio ? config.device.button_gpio : BUTTON_PIN;', lines 303-308 default BUTTON_ACTIVE_LOW and BUTTON_ACTIVE_PULLUP to true, and lines 316/336 do 'userConfig.pinNumber = (uint8_t)_pinNum;' -- so -1 becomes 255 with no guard. Also InputBroker.cpp:148-160 calls pinMode() on the same expression. The runtime override via config.device.button_gpio works as described. Only the cited line ranges are wrong."
+          },
+          {
+            "claim": "LED is a plain single-GPIO LED on GP25 (LED_POWER = PIN_LED, arduino-pico rpipico = 25u), active-high; no addressable LED, no HAS_RGB_LED, no RGBLED_* or NEOPIXEL_* in this variant.",
+            "status": "CONFIRMED",
+            "note": "variant.h has only '#define LED_POWER PIN_LED' and I confirmed PIN_LED against the actual pinned core: arduino-pico 5.4.4 variants/rpipico/pins_arduino.h line 8 is '#define PIN_LED (25u)'. LED_STATE_ON defaults to 1 (src/configuration.h:473-475). I grepped the variant file itself -- no LED_PIN, LED_NOTIFICATION, LED_LORA, WIFI_LED, HAS_NEOPIXEL, NEOPIXEL_*, RGBLED_*, HAS_NCP5623 or HAS_LP5562 -- so the HAS_RGB_LED gate (configuration.h:469-471, not :520) is indeed never satisfied. DETAIL ERROR worth acting on: the claim that LED_POWER is touched only in main.cpp setup and the 3-flash warning is wrong -- StatusLEDModule.cpp also drives GP25 at runtime (see corrections). The headline claim stands."
+          },
+          {
+            "claim": "BLOCKER: Meshtastic firmware has NO SK9822/APA102 driver anywhere in src/. Only single-wire NeoPixel via Adafruit_NeoPixel, plus I2C NCP5623/LP5562 and 3-pin PWM RGB.",
+            "status": "CONFIRMED",
+            "note": "I ran the grep myself over a full master tarball rather than trusting the reported result. 'grep -rniE sk9822|apa102|dotstar' across src/ and variants/ returns exactly two hits, both in variants/esp32/wiphone/platformio.ini lines 17-18 (pololu/APA102@3.0.0) -- nothing in src/. src/AmbientLightingThread.h:43 is confirmed verbatim: 'Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_DATA, NEOPIXEL_TYPE);' -- one data pin, no clock pin, so the APA102-family two-wire protocol has no path through this class. src/configuration.h:469 gate confirmed verbatim (line number is 469, not 520). This is a real blocker for D1 as specified."
+          },
+          {
+            "claim": "SX126X_MAX_POWER is not defined in this variant so it defaults to 22 dBm; no TX_GAIN_LORA; currentLimit = 140 mA; useRegulatorLDO = false so SMPS/DC-DC mode is used and the DCC_SW inductor is required.",
+            "status": "CONFIRMED",
+            "note": "src/mesh/SX126xInterface.cpp lines 16-23 match the quoted block verbatim including the warning comment about external PAs, and limitPower(SX126X_MAX_POWER) is called at the point described. variant.h contains neither SX126X_MAX_POWER nor TX_GAIN_LORA, so 22 applies. src/mesh/SX126xInterface.h:37 is exactly 'float currentLimit = 140; // Higher OCP limit for SX126x PA' -- the one line-number citation in the whole report that is correct. 'bool useRegulatorLDO = false;' confirmed, with the adjacent source comment 'Seems to depend on the connection to pin 9/DCC_SW - if an inductor DCDC?' directly supporting the inductor requirement. 22 dBm for a bare SX1262 with no PA is correct."
+          },
+          {
+            "claim": "Other pin-constraining defines: EXT_NOTIFY_OUT = GP22, HAS_CPU_SHUTDOWN 1, USE_SX1262; battery ADC commented out; comments note I2C SDA=GP4/SCL=GP5 and SerialModule txd=GP8/rxd=GP9.",
+            "status": "CONFIRMED",
+            "note": "All quoted lines are verbatim-correct in variant.h, including the commented '// #define BATTERY_PIN 26' and '// #define ADC_MULTIPLIER 3.1' with the R17=200k/R18=100k comment, and the stray '#define ARDUINO_ARCH_AVR' at the top. EXT_NOTIFY_OUT -> EXTERNAL_NOTIFICATION_MODULE_OUTPUT confirmed at src/modules/ExternalNotificationModule.cpp:49-50 (not 54-55). I additionally cross-checked the non-normative pin comments against the RP2040 pinmux table: GP4=I2C0 SDA and GP5=I2C0 SCL are correct for Wire0, and GP8=UART1 TX / GP9=UART1 RX are correct for arduino-pico's Serial2. So GP22 is genuinely claimed for a buzzer output Pikkolo does not have."
+          },
+          {
+            "claim": "Full GPIO occupancy: GP13,14,15,16,17,18,22,23,24,25 taken; free are GP0-12,19,20,21,26-29 (minus soft-reserved GP4/5, GP8/9, GP26). BOOTSEL costs no GPIO; USB D+/D- are dedicated pins.",
+            "status": "CONFIRMED",
+            "note": "The taken list matches variant.h exactly and the arithmetic on the free list checks out (0,1,2,3,6,7,10,11,12,19,20,21,27,28,29 after honoring the comment reservations). The BOOTSEL sub-claim -- flagged INFERRED-adjacent by the researcher -- I verified against the RP2040 datasheet section 2.8.1 (PDF p.131), which reads: 'Check if SPI CS pin is tied low (\"bootrom button\"), and skip flash boot if so.' So SW2 pulling QSPI_SS low consumes no user GPIO, as claimed. The DFU path is confirmed: src/platform/rp2xx0/main-rp2xx0.cpp enterDfuMode() calls reset_usb_boot(0, 0) -- at line 133, not 158 -- and the datasheet documents the matching bootrom function _reset_to_usb_boot. USB pins confirmed dedicated via datasheet Table 1 (USB_DM/USB_DP are their own pins, not GPIOs). NOTE for your edge-finger design, absent from the findings: that same Table 1 says 'A 27 ohm series termination resistor is required on each pin.'"
+          },
+          {
+            "claim": "platformio.ini pins board = rpipico, capping usable flash at 2 MB (upload.maximum_size=2097152) with a 512 KB LittleFS, so a 4 MB GD25Q32E is half-wasted unless overridden.",
+            "status": "CONFIRMED",
+            "note": "platformio.ini is quoted verbatim and correct (board = rpipico, upload_protocol = picotool, extends = rp2040_base, the five build_flags). variants/rp2040/rp2040.ini confirms board_build.core = earlephilhower, board_build.filesystem_size = 0.5m, -D__PLAT_RP2040__, -D__FREERTOS=1, and the arduino-pico 5.4.4 platform_packages pin. I pulled arduino-pico 5.4.4 boards.txt directly: rpipico.upload.maximum_size=2097152 and rpipico.build.boot2=boot2_w25q080_2_padded_checksum. Headline claim is fully confirmed. TWO ERRORS IN THE DETAIL, one of them fabrication-relevant: the boot2 uses 01h (two-byte SR1 write), NOT 31h, and the blanket 'compatible with the GD25Q32E, so the part choice is fine' does not survive the GD25Q32E datasheet -- see corrections. Treat flash bring-up as an open risk, not a settled one."
+          },
+          {
+            "claim": "Cloning this variant makes the device report as HardwareModel 30 / RP2040_LORA; arch defaults HAS_BUTTON, HAS_TELEMETRY, HAS_SCREEN, HAS_WIRE, HAS_SENSOR, HAS_RADIO all 1.",
+            "status": "CONFIRMED",
+            "note": "platformio.ini custom_meshtastic_* keys are verbatim-correct (hw_model 30, slug RP2040_LORA, display name 'RP2040 LoRa', tags Waveshare, requires_dfu true, support_level 2). src/platform/rp2xx0/architecture.h contains '#elif defined(RP2040_LORA)' -> '#define HW_VENDOR meshtastic_HardwareModel_RP2040_LORA', and I confirmed the numeric value independently in the generated protobuf: src/mesh/generated/meshtastic/mesh.pb.h:88 'meshtastic_HardwareModel_RP2040_LORA = 30'. All six HAS_* defaults confirmed in the same header, each wrapped in #ifndef so a variant can override them."
+          },
+          {
+            "claim": "Deep sleep on RP2040 uses xosc_dormant() which stops the 12 MHz crystal; the RP2040_SLOW_CLOCK path instead uses sleep_run_from_dormant_source(DORMANT_SOURCE_ROSC) then reboot; and rp2040Loop() arms an 8 s watchdog via watchdog_enable(8000, true) on every boot.",
+            "status": "REFUTED",
+            "note": "Both halves are wrong. (1) The gate is '#ifdef __PLAT_RP2040__', not RP2040_SLOW_CLOCK, and rp2040.ini defines __PLAT_RP2040__ for every rp2040 build -- so this variant takes the RTC-alarm branch (rtc_init, sleep_run_from_dormant_source(DORMANT_SOURCE_ROSC), sleep_goto_sleep_until, rp2040.reboot()), and the xosc_dormant() call in that branch is commented out at line 67. The bare xosc_dormant() lives only in the #else branch for non-__PLAT_RP2040__ targets. RP2040_SLOW_CLOCK gates only clock-frequency logging in rp2040Setup() and the initVariant() 18 MHz setup. (2) There is no rp2040Loop() and no watchdog anywhere: a recursive grep of the full master tree for 'watchdog_enable', 'watchdog_update', and 'rp2040Loop' returns zero hits. The '8 s blocking reboots the stick' warning is fictional. Practical impact for a USB-powered stick is small, but the finding should not be relied on."
+          }
+        ]
+      }
+    },
+    {
+      "topic": "rp2040-minimal",
+      "research": {
+        "topic": "RP2040 QFN-56 required minimum external circuit (power, decoupling, VREG, crystal, QSPI flash, BOOTSEL, RUN, TESTEN, USB, GPIO pin map) — for Pikkolo Mesh Stick Rev A",
+        "findings": [
+          {
+            "claim": "RP2040 QFN-56 power pin numbers are fixed by datasheet Table 621 and there are 12 supply pins plus the center GND pad (pin 57).",
+            "detail": "IOVDD = pins 1, 10, 22, 33, 42, 49 (6 pins). DVDD = pins 23, 50 (2 pins). VREG_VIN = pin 44. VREG_VOUT = pin 45. USB_VDD = pin 48. ADC_AVDD = pin 43. GND = pin 57 (center exposed pad only — there is no other ground pin on the package).",
+            "source": "RP2040 Datasheet, §5.5.2.2 Pin List, Table 621 \"Power supply pins\" (p.614). Local: /private/tmp/claude-501/-Users-zach-dev-mesh/b7abdacf-f144-4aa7-a127-8ddf4b7b0b0c/scratchpad/rp2040ds.txt line ~29440",
+            "confidence": "high"
+          },
+          {
+            "claim": "Supply voltages: IOVDD/VREG_VIN 1.62–3.63V, USB_VDD 3.135–3.63V, ADC_AVDD 1.62–3.63V (degraded <2.97V), DVDD 1.05–1.16V (nom 1.1V).",
+            "detail": "Table 634: IOVDD min 1.62 / typ 1.8 or 3.3 / max 3.63 V. DVDD min 1.05 / typ 1.1 / max 1.16 V. VREG_VIN min 1.62 / typ 1.8 or 3.3 / max 3.63 V. USB_VDD min 3.135 / typ 3.3 / max 3.63 V. ADC_AVDD min 1.62 / typ 3.3 / max 3.63 V. For Pikkolo: run IOVDD, USB_VDD, ADC_AVDD, VREG_VIN all from 3V3_DIG (ME6211C33). Note USB_VDD min is 3.135V — the ME6211 must not droop below that under SX1262 TX load or USB enumeration degrades.",
+            "source": "RP2040 Datasheet, §5.6 Power Supplies, Table 634 (p.622)",
+            "confidence": "high"
+          },
+          {
+            "claim": "Required decoupling is 100nF per power pin, close to the pin — the official rule, with exactly one documented deviation.",
+            "detail": "\"Ordinarily, we recommend the use of a 100nF capacitor per power pin.\" The single documented deviation in the official minimal design: pins 48 (USB_VDD) and 49 (IOVDD) share one 100nF (C9) because there is no room on that side of the QFN. So a full-rule design uses 8 × 100nF on the 3V3 rail (pins 1, 10, 22, 33, 42, 43, 48, 49) or 7 × 100nF if 48/49 share, plus 2 × 100nF on the 1V1 rail (pins 23, 50).",
+            "source": "Hardware design with RP2040 (build-date 2024-10-15, build 2b6018e-clean), §2.1.2 Decoupling capacitors; RP2040 Datasheet §2.9.1, §2.9.2, §2.9.4, §2.9.5",
+            "confidence": "high"
+          },
+          {
+            "claim": "The official minimal design's exact cap-to-pin assignment (verified from the shipped KiCad netlist + PCB placement) is the reference to copy.",
+            "detail": "3V3 rail 100nF: C11→pin 1 (IOVDD), C13→pin 10 (IOVDD), C14→pin 22 (IOVDD), C12→pin 33 (IOVDD), C15→pin 42 (IOVDD), C16→pin 43 (ADC_AVDD), C9→shared by pin 48 (USB_VDD) + pin 49 (IOVDD). 1V1 rail 100nF: C7→pin 23 (DVDD), C6→pin 50 (DVDD). 1µF: C10→pin 44 (VREG_VIN), C8→pin 45 (VREG_VOUT). Bulk: C17 10µF on 3V3 near the chip; C4 10µF + C5 100nF at the LDO output; C1 10µF at LDO input. All 100nF are 0402/M1005 25V X7R 10%; the 1µF are 0402 16V X5R; 10µF are 0805/M2012 16V X5R. Schematic carries explicit notes: \"Make sure C10 is close to pin 44 of RP2040\" and \"Make sure C8 is close to pin 45 of RP2040\".",
+            "source": "Official RP2040 minimal design KiCad files RPI-RP2040-MINIMAL_R3-S1 (schematic rev R3-S1, dated 2026-07-03, drawn Mike Stimson) from https://datasheets.raspberrypi.com/rp2040/Minimal-KiCAD.zip; netlist exported locally to /private/tmp/claude-501/-Users-zach-dev-mesh/b7abdacf-f144-4aa7-a127-8ddf4b7b0b0c/scratchpad/min.net",
+            "confidence": "high"
+          },
+          {
+            "claim": "On-chip core regulator: VREG_VIN (pin 44) in from 3V3, VREG_VOUT (pin 45) out at 1.1V, and VREG_VOUT MUST be connected off-chip to both DVDD pins (23 and 50). Each of pin 44 and pin 45 requires a 1µF capacitor placed close to the pin.",
+            "detail": "\"The regulator must have 1µF capacitors placed close to its input (VREG_VIN) and output (VREG_VOUT) pins.\" The VREG_VOUT→DVDD connection is not internal: \"Note that the regulator output pin (VREG_VOUT) must be connected to the chip's DVDD pins off-chip.\" Regulator supplies up to 100mA, default 1.1V at power-on, adjustable 0.80–1.30V in 50mV steps under software control. ESR of the two 1µF caps is constrained but ordinary small ceramic chip caps meet it. Official netlist confirms net +1V1 = {U3.23 DVDD, U3.45 VREG_VOUT, U3.50 DVDD, C6 100n, C7 100n, C8 1u}.",
+            "source": "RP2040 Datasheet §2.10.1 Application Circuit (Figure 20) and §2.9.7.1; Hardware design with RP2040 §2.1.3",
+            "confidence": "high"
+          },
+          {
+            "claim": "VREG_VIN (pin 44) must be powered even if you never use the internal regulator — it also powers the power-on-reset and brown-out detect blocks.",
+            "detail": "Datasheet CAUTION: \"VREG_VIN also powers the chip's power-on reset and brown-out detection blocks, so it must be powered even if the on-chip voltage regulator is not used.\" Corollary for Pikkolo: never gate/switch 3V3_DIG off pin 44.",
+            "source": "RP2040 Datasheet §2.9.3",
+            "confidence": "high"
+          },
+          {
+            "claim": "Crystal pins are XIN = pin 20 and XOUT = pin 21; the required part is a 12MHz Abracon ABM8-272-T3 (3.2×2.5mm, CL=10pF, ESR max 50Ω, ±30ppm).",
+            "detail": "Table 617: XIN pin 20, XOUT pin 21, both Analogue (XOSC), power domain IOVDD. RP2040 supports 1–15MHz crystals but the USB bootloader requires exactly 12MHz. Raspberry Pi explicitly recommend ABM8-272-T3 and state Pico was \"specifically tuned\" for it: 12.000MHz, fundamental-AT, -40 to +85°C, ±30ppm tolerance and stability, ESR(R1) max 50Ω, C0 3.0pF, CL 10pF, drive level 10–200µW. This matches the Pikkolo \"12MHz 3225 crystal (Y1)\" slot — specify ABM8-272-T3 rather than a generic 3225.",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 617 and §2.16.1.1 Table 257; Hardware design with RP2040 §2.3.1 Table 1",
+            "confidence": "high"
+          },
+          {
+            "claim": "Load caps are 15pF each (C0G/NP0), one per crystal terminal to GND — NOT 10pF and NOT 22pF.",
+            "detail": "Crystal CL = 10pF. Two equal caps in series give 15/2 = 7.5pF; add ~3pF assumed stray from PCB traces + XIN/XOUT pins → 10.5pF total, close enough to 10pF. Official parts: 15pF, 0402 (M1005) 50V C0G 5% in the minimal design (C2, C3); Pico R3 uses 15pF 0603 25V C0G 5% (C16, C17). Keep the XIN/XOUT traces very short — stray C is a first-order term here.",
+            "source": "Hardware design with RP2040 §2.3; official minimal-design netlist (C2=15p, C3=15p); Pico R3 schematic (C16=15p, C17=15p)",
+            "confidence": "high"
+          },
+          {
+            "claim": "The series damping resistor is 1kΩ and it sits between the crystal and XOUT (pin 21) — and critically, the 15pF load cap on that side connects to the CRYSTAL side of the resistor, not to the XOUT pin.",
+            "detail": "Verified topology from the official minimal-design netlist: net /XIN = {U3.20 XIN, X1.1, C2.1}; net Net-(C3-Pad1) = {X1.3, C3.1, R5.1}; net /XOUT = {R5.2, U3.21 XOUT}. So: pin20 XIN —•— X1 pin1, with C2 15pF to GND at that node. X1 pin3 —•— C3 15pF to GND, and R5 1kΩ from that same node to pin21 XOUT. R5 = 1k 1% 0402 63mW. Pico R3 is identical: R14 = 1K 1% M1005, on net \"XR\" between X1 pin 3 (with C17 15pF to GND) and XOUT. X1 pins 2 and 4 are the case pads → GND. 1kΩ is tuned for IOVDD = 3.3V and ESR ≤ 50Ω; if IOVDD were not 3.3V the resistor must be re-tuned. Do NOT put the 1k on XIN, and do NOT put C3 between R5 and XOUT.",
+            "source": "Official minimal design netlist (R5=1k) + Hardware design with RP2040 §2.3; Pico Rev3 schematic (RPI-PICO rev 3, 15 Jan 2021, James Adams; Pico Datasheet Appendix B) — R14=1K, net XR",
+            "confidence": "high"
+          },
+          {
+            "claim": "QSPI flash mapping — RP2040 pin → 25-series SOIC-8 pin (identical for W25Q128JVS, W25Q16JV and GD25Q32E).",
+            "detail": "QSPI_SS_N pin 56 → flash pin 1 (CS#). QSPI_SD1 pin 55 → flash pin 2 (SO / IO1). QSPI_SD2 pin 54 → flash pin 3 (WP# / IO2). Flash pin 4 (VSS) → GND. QSPI_SD0 pin 53 → flash pin 5 (SI / IO0). QSPI_SCLK pin 52 → flash pin 6 (SCLK). QSPI_SD3 pin 51 → flash pin 7 (HOLD# / IO3). Flash pin 8 (VCC) → 3V3, with its own 100nF decoupler (C8 on the Pico, C5 on the minimal design). Mnemonic: 56→1, 55→2, 54→3, 53→5, 52→6, 51→7. Route these six nets short and direct; keep R1/R2 (the QSPI_SS resistors) close to the flash chip.",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 616; official minimal-design netlist (U3↔U2 W25Q128JVSIQ); Pico R3 schematic (U1↔U3 W25Q16JVUXIQ); GD25Q32E Datasheet Rev1.5 (June 2025) §2 Table 1 \"Pin Description for SOP8 Package\"",
+            "confidence": "high"
+          },
+          {
+            "claim": "BOOTSEL: the boot button pulls QSPI_SS_N (pin 56) to GND through a 1kΩ series resistor; a 10kΩ pull-up to 3V3 is provided as DNF.",
+            "detail": "Exact arrangement (official minimal design): net /QSPI_SS = {U3.56 QSPI_SS, U2.1 CS#, R1.1, R2.2}. R1 = 1kΩ, its other end (R1.2) goes to the USB_BOOT node (J2 header pin 1); J2 pin 2 = GND. R2 = 10kΩ from QSPI_SS up to +3V3, marked DNF. So: 3V3 —[10k DNF]— QSPI_SS/CS# —[1k]— SW(BOOTSEL) — GND. Pico Rev3 is the same topology: R11 = 1K from QSPI_SS to SW1 (TP-1221U-K9K5325 tact switch) to GND, and R4 = NO-FIT pull-up to 3V3. The 1k (not a direct short) limits current and keeps the flash CS from being hard-shorted during normal SPI activity. Both resistors must be placed close to the flash.",
+            "source": "Hardware design with RP2040 §2.2; official minimal design netlist (R1=1k, R2=10k); Pico Rev3 schematic (R11=1K, R4=NO-FIT)",
+            "confidence": "high"
+          },
+          {
+            "claim": "For the GD25Q32E specifically, FIT the 10kΩ QSPI_SS pull-up rather than leaving it DNF.",
+            "detail": "Raspberry Pi mark R2 DNF only because they verified it unnecessary \"with this particular flash device\" (W25Q), and explicitly say \"if a different flash is used, it may become important to be able to insert a 10kΩ resistor here.\" GigaDevice's own datasheet note 1 for the GD25Q32E states: \"CS# must be driven high if chip is not selected. Please don't leave CS# floating any time after power is on.\" RP2040's QSPI_SS defaults to an internal pull-up, but there is a short window at power-on where its state is not guaranteed. Recommendation for Pikkolo U3: populate 10k to 3V3_DIG.",
+            "source": "Hardware design with RP2040 §2.2; GD25Q32E Datasheet Rev1.5 §2, Table 1 note 1",
+            "confidence": "high"
+          },
+          {
+            "claim": "RUN is pin 26 with an internal pull-up; no external pull-up is required, and neither the Pico nor the official minimal design fits one.",
+            "detail": "Table 619: RUN, pin 26, Digital In (FT), power domain IOVDD, reset state Pull-Up, \"Chip enable / reset\". Datasheet §1.4.2: \"Global asynchronous reset pin. Reset when driven low, run when driven high. If no external reset is required, this pin can be tied directly to IOVDD.\" Verified: in the minimal design net /RUN = {U3.26, J4.29} only — no resistor, no cap. In Pico Rev3, RUN = {U1.26, J0 header pin 30} only. If Pikkolo wants a reset button, the standard add is a momentary switch from pin 26 to GND (optionally with a 10k to 3V3 in parallel with the internal pull-up); a large cap on RUN is not part of any official reference design.",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 619 and §1.4.2 Pin Descriptions; official minimal-design netlist; Pico Rev3 schematic",
+            "confidence": "high"
+          },
+          {
+            "claim": "TESTEN is pin 19 and MUST be tied directly to GND.",
+            "detail": "Table 619: TESTEN, pin 19, Digital In, IOVDD domain, reset state Pull-Down, \"Test enable (connect to Gnd)\". §1.4.2: \"Factory test mode pin. Tie to GND.\" Confirmed in the official minimal design: U3.19 appears on the GND net. Do not leave it floating and do not rely on the internal pull-down.",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 619 and §1.4.2; official minimal-design netlist (GND net includes U3.19)",
+            "confidence": "high"
+          },
+          {
+            "claim": "USB: USB_DM = pin 46, USB_DP = pin 47; each needs a 27Ω series resistor placed close to the chip. No external pull-up/pull-down is needed.",
+            "detail": "Table 620: USB_DP pin 47, USB_DM pin 46, type USB IO, power domain USB_VDD, \"27Ω series resistor required for USB operation\". §1.4.2: \"A 27Ω series termination resistor is required on each pin, but bus pull-ups and pull-downs are provided internally.\" Official minimal design: net Net-(U3-USB_DP) = {U3.47, R3.2} and R3.1 → connector D+; net Net-(U3-USB_DM) = {U3.46, R4.2} and R4.1 → connector D-. R3 = R4 = 27Ω 1% 0402. Pico R3 uses R12/R13 = 27R 1% 0603 50mW in the same place. Schematic note: \"Make sure R3 and R4 are close to RP2040.\" For Pikkolo: put the 27R next to U1, and put the USBLC6-2SC6 (U7) on the EDGE-FINGER side of the 27R resistors, closest to the connector fingers.",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 620 and §1.4.2; Hardware design with RP2040 §2.4.1; official minimal-design netlist (R3=27, R4=27)",
+            "confidence": "high"
+          },
+          {
+            "claim": "Pins that must be grounded or must not float: pin 19 (TESTEN) → GND; pin 57 (center pad) → GND; USB_VDD pin 48 must never be left unconnected; flash CS# must not float.",
+            "detail": "(a) TESTEN pin 19 → GND, mandatory. (b) Pin 57 is the ONLY ground connection on the package — the central exposed pad, \"bonded to a number of internal ground pads on the RP2040 die.\" It must be soldered down with a good via array; on a 2-layer 2.0mm board this is also the thermal/return path. (c) §2.9.4: \"USB_VDD should not be left unconnected\" — even in designs that never use USB, tie it to a 1.8–3.3V rail. (d) GD25Q32E CS# must not float post-power-on. (e) There is no requirement to ground unused GPIOs — all GPIOs and the QSPI bank power up with defined pulls (GPIO0-29 pull-down, QSPI_CSn pull-up, QSPI_SCLK pull-down, SWCLK/SWD pull-up).",
+            "source": "RP2040 Datasheet §5.5.2.2 Tables 615/616/619/621, §1.4.2 (GND description), §2.9.4; GD25Q32E Datasheet Rev1.5 Table 1 note 1",
+            "confidence": "high"
+          },
+          {
+            "claim": "GP number → QFN-56 physical pin: four contiguous runs with offsets +2, +3, +11, +12.",
+            "detail": "GP0..GP7 → pins 2,3,4,5,6,7,8,9 (pin = GP+2). GP8..GP15 → pins 11,12,13,14,15,16,17,18 (pin = GP+3). GP16..GP21 → pins 27,28,29,30,31,32 (pin = GP+11). GP22..GP29 → pins 34,35,36,37,38,39,40,41 (pin = GP+12); GP26/27/28/29 are also ADC0/1/2/3. Explicit list: GP0=2, GP1=3, GP2=4, GP3=5, GP4=6, GP5=7, GP6=8, GP7=9, GP8=11, GP9=12, GP10=13, GP11=14, GP12=15, GP13=16, GP14=17, GP15=18, GP16=27, GP17=28, GP18=29, GP19=30, GP20=31, GP21=32, GP22=34, GP23=35, GP24=36, GP25=37, GP26=38, GP27=39, GP28=40, GP29=41. The gaps are the non-GPIO pins: 1 (IOVDD), 10 (IOVDD), 19 (TESTEN), 20 (XIN), 21 (XOUT), 22 (IOVDD), 23 (DVDD), 24 (SWCLK), 25 (SWD/SWDIO), 26 (RUN), 33 (IOVDD).",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 615 \"GPIO pins\" (p.612-614)",
+            "confidence": "high"
+          },
+          {
+            "claim": "Pikkolo-relevant cross-reference: the BOM's \"PE4259 ctrl = GP17\" lands on QFN pin 28, and it is a normal user IO with a power-on pull-down.",
+            "detail": "GP17 = QFN-56 pin 28, Digital IO (FT), IOVDD domain, reset state Pull-Down. Note the reset-state pull-down means the PE4259 control line sits LOW during reset/boot — check which PE4259 through-path that selects (CTRL low) so the radio isn't left in a hot-TX path at boot, and consider whether a defined-state pull resistor is wanted at the switch.",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 615; project BOM statement",
+            "confidence": "high"
+          },
+          {
+            "claim": "SWD debug pins are SWCLK = pin 24 and SWDIO/SWD = pin 25, both with internal pull-ups.",
+            "detail": "Table 618: SWCLK pin 24 Digital In (FT), SWD pin 25 Digital IO (FT), both IOVDD domain, both reset state Pull-Up. Not strictly required for a minimum circuit (BOOTSEL+USB is enough to load code), but both reference designs bring them to test points/headers. Worth 2 test pads on the Pikkolo stick since there's no debug connector.",
+            "source": "RP2040 Datasheet §5.5.2.2 Table 618",
+            "confidence": "high"
+          },
+          {
+            "claim": "Complete minimum external BOM around the RP2040 (excluding flash and the input LDO): 9 × 100nF, 2 × 1µF, 1 × 10µF bulk, 2 × 15pF C0G, 1 × 1kΩ (XOUT damping), 1 × 1kΩ (BOOTSEL series), 1 × 10kΩ (QSPI_SS pull-up), 2 × 27Ω, 1 × 12MHz crystal, 1 × QSPI flash, 1 × momentary switch.",
+            "detail": "Derived from the official minimal design (which uses 7 × 100nF on 3V3 because pins 48/49 share; use 8 if you have room). Counting: 100nF — pins 1, 10, 22, 33, 42, 43, 48, 49 (3V3) + pins 23, 50 (1V1) + 1 at the flash VCC. 1µF — pin 44 and pin 45. 10µF — local 3V3 bulk. 15pF ×2 — crystal. 1k ×2, 10k ×1, 27R ×2 as above. No external components at all are required on RUN, TESTEN (wire to GND), SWCLK, SWDIO, or any GPIO.",
+            "source": "Official RP2040 minimal design RPI-RP2040-MINIMAL_R3-S1 BOM/netlist + Hardware design with RP2040 §2",
+            "confidence": "high"
+          },
+          {
+            "claim": "QFN-56 footprint warning: RP2040's central ePad is smaller than a standard 0.4mm QFN-56 land pattern, so stock CAD footprints need adjusting — and this is what lets you route between the ePad and the peripheral pads.",
+            "detail": "\"There is no standard size for the central GND pad (or ePad) with QFNs. However, the one on RP2040 is smaller than most. This means that standard 0.4mm QFN-56 footprints provided with CAD tools may need adjusting. This gives the opportunity to route between the central pad and the ones on the periphery, which can help with maintaining power and ground integrity on cheaper PCBs.\" Recommended PCB footprint dimensions (Figure 167): 0.40mm pitch, 0.20mm pad width, 3.20 × 3.20mm center pad, land spans 5.40 / 6.00 / 7.75mm. This inner-ring routing is exactly the trick that makes a 2-layer board like Pikkolo work — verify the KiCad RP2040 footprint in /Users/zach/dev/mesh/mesh/mesh.kicad_pcb against Figure 167 before fabricating.",
+            "source": "RP2040 Datasheet §5.1 (NOTE, p.607) and §5.1.2 Recommended PCB Footprint, Figure 167 (p.608)",
+            "confidence": "high"
+          },
+          {
+            "claim": "USB differential impedance guidance conflicts with Pikkolo's 2.0mm, 2-layer stackup — this is a real risk for the edge-finger USB.",
+            "detail": "The guide targets 90Ω differential and gives 0.8mm-wide traces with a 0.15mm gap on a 1mm 2-layer board, over solid uninterrupted ground. It then says: \"If a PCB thicker than 1mm is chosen for your build, then we have two options. We could re-engineer the USB transmission lines to compensate for the greater distance between the track and ground underneath (which could be a physical impossibility), or we could ignore it, and hope for the best. USB FS can be quite forgiving... but it's probably not going to be compliant to the USB standard.\" At 2.0mm with a 2-layer stack the dielectric to the ground plane is ~1.9mm, so hitting 90Ω differential needs impractically wide traces. Mitigations: keep D+/D- as short as physically possible (the edge fingers are right at the board edge, which helps), keep a solid unbroken ground pour directly beneath the whole run, keep the 27R at the chip, and accept non-compliant-but-functional FS. Note the 2.0mm thickness is itself required by the USB-A plug geometry, so it is not negotiable.",
+            "source": "Hardware design with RP2040 §2.4.1 USB",
+            "confidence": "high"
+          },
+          {
+            "claim": "Boot/flash-compatibility requirement for the GD25Q32E: the bootrom probes with 03h serial read, 24-bit addressing, ~1MHz, cycling all four CPOL/CPHA combinations, and the device must also support 02h/05h/06h/20h for bootrom flash programming.",
+            "detail": "Required command support: 03h (read, 24-bit addr), 02h (256-byte page program), 05h (status register read), 06h (write enable), 20h (4kB sector erase). GD25Q32E supports all of these, so UF2 drag-and-drop programming will work. Also note the XIP continuous-read caveat: before 03h the bootrom issues a fixed de-XIP sequence (CSn=1 with IO[3:0] pulled 0000 for ×32 clocks; CSn=0 with IO[3:0] pulled 1111 for ×32 clocks; CSn=1; CSn=0 with MOSI=1 driven, others Hi-Z, ×16 clocks). Use a boot_stage2 that does not leave the GD25Q32E in a mode that ignores serial commands after a warm reset.",
+            "source": "Hardware design with RP2040 §2.6 Supported flash chips; GD25Q32E Datasheet Rev1.5",
+            "confidence": "high"
+          },
+          {
+            "claim": "Power sequencing imposes no ordering constraint, which matters for Pikkolo's two-LDO (3V3_DIG / 3V3_RF) split.",
+            "detail": "\"RP2040's power supplies may be powered up or down in any order.\" Only caveat: small transient currents can flow in ADC_AVDD if it powers up before, or down after, DVDD — harmless, and in a single-3V3 design DVDD comes up shortly after ADC_AVDD anyway via the on-chip regulator startup, which the datasheet calls \"acceptable behaviour.\" So ADC_AVDD (pin 43) may be fed from 3V3_DIG directly with no sequencing circuitry.",
+            "source": "RP2040 Datasheet §2.9.6 Power Supply Sequencing",
+            "confidence": "high"
+          },
+          {
+            "claim": "The XOSC will not start by itself and needs no external enable — but the 32MHz TCXO for the SX1262 is a completely separate clock and must not be confused with the RP2040 12MHz crystal.",
+            "detail": "RP2040 boots on its internal ROSC; software sets CTRL_ENABLE to start the XOSC, and STARTUP_DELAY (default 1ms, correct for 12MHz) gates STATUS_STABLE. No external component is involved. Separately, Pikkolo's Y2 32MHz TCXO runs at 1.8V from SX1262 DIO3 and is entirely inside the radio's clock domain — it does not connect to RP2040 XIN/XOUT in any way. Do not attempt to share one oscillator between them; the USB bootloader specifically requires 12MHz on XIN.",
+            "source": "RP2040 Datasheet §2.16.2, §2.16.3, §1.4.2 (XIN/XOUT description: \"The USB bootloader requires a 12MHz crystal or 12MHz clock input\")",
+            "confidence": "high"
+          }
+        ],
+        "open_questions": [
+          "Is Pikkolo's Y1 specified as the Abracon ABM8-272-T3 specifically? The BOM only says \"12MHz 3225 crystal\". ABM8-272-T3 is the 3.2x2.5mm part Raspberry Pi tuned Pico for (CL 10pF, ESR max 50Ω). Any substitute with different CL or ESR invalidates the 15pF/1k values and requires re-tuning + temperature testing.",
+          "Will the 10kΩ QSPI_SS pull-up (the DNF R2 in the reference design) actually be populated for the GD25Q32E? GigaDevice explicitly forbids leaving CS# floating after power-on. Recommend fitting it.",
+          "Which rail feeds ADC_AVDD (pin 43) and USB_VDD (pin 48) on Pikkolo — 3V3_DIG (ME6211) or 3V3_RF (LP5907)? Both must be ≥3.135V for USB_VDD; recommend both on 3V3_DIG so the LP5907 stays dedicated to the SX1262.",
+          "Does the Pikkolo design include a RUN reset button or RUN test point? Neither reference design fits anything on RUN, but with SW2 assigned to BOOTSEL there is no way to reset without unplugging — which is exactly the toggle needed to enter BOOTSEL mode after grounding QSPI_SS. On a USB-stick form factor, re-plugging is the reset, so this may be acceptable by design — worth confirming intent.",
+          "How will 90Ω differential USB be handled on a 2.0mm 2-layer board? The official guidance says this is likely non-compliant. Need the intended trace width/gap and confirmation that a solid ground pour runs unbroken under the full D+/D- length from edge fingers to U1.",
+          "Is the USBLC6-2SC6 (U7) placed on the connector side of the 27Ω resistors? ESD protection belongs at the edge fingers; the 27Ω belong at the RP2040. Confirm the ordering in the layout.",
+          "Does the KiCad RP2040 footprint in /Users/zach/dev/mesh/mesh/mesh.kicad_pcb match Figure 167 (0.20mm pads, 0.40mm pitch, 3.20x3.20mm ePad)? Stock CAD QFN-56 footprints have an oversized center pad and will block the inner-ring routing that a 2-layer board depends on.",
+          "GP17 (pin 28) powers up with an internal pull-down, so the PE4259 CTRL is LOW through reset and boot. Which RF path does CTRL=low select on the PE4259-63, and is that the safe (RX) path?",
+          "Are decoupling caps placed on both sides of the 2.0mm board, or top-only? The reference minimal design is top-only and had to make pins 48/49 share a cap for that reason; a stick this narrow may face the same crowding."
+        ]
+      },
+      "verdict": {
+        "verdicts": [
+          {
+            "claim": "RP2040 QFN-56 power pins per Table 621: IOVDD 1,10,22,33,42,49; DVDD 23,50; VREG_VIN 44; VREG_VOUT 45; USB_VDD 48; ADC_AVDD 43; GND 57 (centre pad only, no other ground pin).",
+            "status": "CONFIRMED",
+            "note": "Verified in RP2040 Datasheet Table 621 (p.613 of doc / PDF p.615). Source PDF sha256 be56fbb7... is byte-identical to the current https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf, so this is the live primary source, not a stale copy. Every pin number matches. §1.4.2 independently corroborates GND: 'Single external ground connection, bonded to a number of internal ground pads on the RP2040 die.' Minor pedantry only: the '12 supply pins' count includes VREG_VOUT, which is a regulator OUTPUT, not a supply input — 11 pins actually take external power."
+          },
+          {
+            "claim": "Supply voltages Table 634: IOVDD/VREG_VIN 1.62-3.63V, USB_VDD 3.135-3.63V, ADC_AVDD 1.62-3.63V (degraded <2.97V), DVDD 1.05-1.16V nom 1.1V.",
+            "status": "CONFIRMED",
+            "note": "Table 634 read verbatim: IOVDD 1.62/1.8 or 3.3/3.63; DVDD 1.05/1.1/1.16; VREG_VIN 1.62/1.8 or 3.3/3.63; USB_VDD 3.135/3.3/3.63; ADC_AVDD 1.62/3.3/3.63. Footnote c confirms 'ADC performance will be compromised at voltages below 2.97V'. Two footnotes the researcher omitted and that matter for Pikkolo: (a) footnote a — if IOVDD <2.5V the GPIO VOLTAGE_SELECT registers must be adjusted; (b) footnote b — DVDD short-term transients must stay within +/-100mV, and clk_sys at 200MHz requires DVDD=1.15V."
+          },
+          {
+            "claim": "Decoupling rule is 100nF per power pin, with one documented deviation: pins 48 and 49 share one 100nF (C9).",
+            "status": "CONFIRMED",
+            "note": "'Hardware design with RP2040' §2.1.2 (PDF sha256 6523a2eb..., byte-identical to the current official download) says verbatim: 'Ordinarily, we recommend the use of a 100nF capacitor per power pin, however, we deviate from this rule in a couple of instances.' The 48/49-share-C9 deviation is confirmed verbatim. Nit: the guide says 'a couple of instances', not 'exactly one' — the second instance is the VREG's 1uF requirement (§2.1.3), which is an addition rather than a reduction, so the researcher's substance is right. Per-pin 100nF is independently mandated by RP2040 Datasheet §2.9.1, §2.9.2, §2.9.4 and §2.9.5 as claimed. The derived count (8 on 3V3 = 6 IOVDD + ADC_AVDD + USB_VDD; 2 on 1V1) is arithmetically correct."
+          },
+          {
+            "claim": "Exact cap-to-pin assignment of the official minimal design: C11->1, C13->10, C14->22, C12->33, C15->42, C16->43, C9->48+49, C7->23, C6->50, C10->44, C8->45; C17 10uF 'on 3V3 near the chip'; 'C4 10uF + C5 100nF at the LDO output'; C1 10uF at LDO input.",
+            "status": "REFUTED",
+            "note": "THE RP2040 PIN ASSIGNMENTS ARE ALL CORRECT — do not discard them. I re-downloaded Minimal-KiCAD.zip and confirmed sha256 8fdae5c1... matches the local copy byte-for-byte, then parsed both the netlist and the shipped .kicad_pcb and computed pad-to-pad distances. Net membership fixes C8->+1V1 (so pin 45 VREG_VOUT) and C10->+3V3 (so pin 44 VREG_VIN), C7->pin 23, C6->pin 50; geometry fixes C11->1 (2.64mm), C13->10 (2.62), C14->22 (2.62), C12->33 (2.62), C15->42 (2.96), C16->43, C9 mid-way between 48/49/50 (3.6mm) as the guide describes. Component specs also all verified against the shipped BOM. TWO DETAILS ARE WRONG, both about caps away from the MCU: (1) C5 is NOT at the LDO output — it sits 2.54mm from U2 pin 8 (flash VCC) and 9.57mm from U1; it is the flash decoupler, exactly as the researcher's own claim 10 says. The two statements contradict each other and claim 10 is the correct one. There is NO 100nF at the LDO output at all. (2) C17 10uF is NOT 'near the chip' — it is 21.81mm from the nearest RP2040 pad (and 5.3mm from J2, 8.13mm from U2). Schematic notes 'Make sure C10 is close to pin 44 of RP2040' and 'Make sure C8 is close to pin 45 of RP2040' confirmed verbatim in the .kicad_sch."
+          },
+          {
+            "claim": "VREG_VIN pin 44 in from 3V3, VREG_VOUT pin 45 out at 1.1V, VREG_VOUT must be connected off-chip to DVDD pins 23 and 50; 1uF close to each of pins 44 and 45; 100mA, 1.1V default, 0.80-1.30V in 50mV steps.",
+            "status": "CONFIRMED",
+            "note": "§2.10.1 verbatim: 'The regulator must have 1uF capacitors placed close to its input (VREG_VIN) and output (VREG_VOUT) pins.' §2.9.7.1 verbatim: 'Note that the regulator output pin (VREG_VOUT) must be connected to the chip's DVDD pins off-chip.' §2.10 confirms 100mA, 1.1V at power-on/reset, 0.80-1.30V in 50mV steps. ESR constraint confirmed in hardware guide §2.1.3 ('by using physically small ceramic chip capacitors, these requirements will almost certainly be met'). Netlist confirmed exactly: net +1V1 = {C6.1, C7.1, C8.1, U3.23 DVDD, U3.45 VREG_VOUT, U3.50 DVDD}."
+          },
+          {
+            "claim": "VREG_VIN (pin 44) must be powered even if the internal regulator is unused, because it also powers power-on reset and brown-out detect.",
+            "status": "CONFIRMED",
+            "note": "RP2040 Datasheet §2.9.3 CAUTION, quoted verbatim and correctly: 'VREG_VIN also powers the chip's power-on reset and brown-out detection blocks, so it must be powered even if the on-chip voltage regulator is not used.' §2.9.7.2 reinforces it for the external-core-supply case. The Pikkolo corollary (never gate 3V3_DIG off pin 44) follows directly."
+          },
+          {
+            "claim": "XIN = pin 20, XOUT = pin 21; required crystal is Abracon ABM8-272-T3, 12MHz, 3.2x2.5mm, CL 10pF, ESR max 50 ohm, +/-30ppm.",
+            "status": "CONFIRMED",
+            "note": "Table 617 confirms XIN 20 / XOUT 21, Analogue (XOSC), IOVDD domain. RP2040 Datasheet Table 257 and hardware-guide Table 1 are identical and confirm every spec line: 12.000MHz, Fundamental-AT, -40/+85C, Ftol +/-30ppm, Fstab +/-30ppm, ESR(R1) 50 ohm max, C0 3.0pF, CL 10pF, drive 10-200uW. §2.16.1 confirms '1MHz to 15MHz crystals' supported; §1.4.2 confirms 'The USB bootloader requires a 12MHz crystal or 12MHz clock input.' The shipped minimal-design schematic symbol X1 carries manufacturer 'Abracon' / MPN 'ABM8-272-T3', independently confirming the part. The recommendation to spec ABM8-272-T3 rather than a generic 3225 is well supported — both documents warn 'Even if you use a crystal with similar specifications, you will need to test the circuit over a range of temperatures to ensure stability.'"
+          },
+          {
+            "claim": "Crystal load caps are 15pF C0G each, one per terminal to GND — not 10pF, not 22pF.",
+            "status": "CONFIRMED",
+            "note": "Hardware guide §2.3 derives it explicitly (15/2 = 7.5pF series + ~3pF assumed stray = 10.5pF vs CL 10pF target). Minimal-design BOM line 2: C2,C3 = 15p, Murata GRM1555C1H150JA01D, 'Capacitor, MLCC, 15pF, 5%, M1005, 50V, C0G' — so 0402/M1005 50V C0G 5%, exactly as claimed. Pico Rev3 schematic rendered from the official Pico datasheet: C16 and C17 are both '15p 25V 5% M0603 C0G' — 0603 25V, also exactly as claimed. The warning to keep XIN/XOUT traces short is the guide's own ('Try and keep the layout as short as possible')."
+          },
+          {
+            "claim": "The 1k damping resistor sits between the crystal and XOUT (pin 21), and the 15pF cap on that side connects to the CRYSTAL side of the resistor, not to the XOUT pin.",
+            "status": "CONFIRMED",
+            "note": "This is the highest-risk topology detail in the set and it is exactly right. Minimal-design netlist parsed directly: /XIN = {C2.1, U3.20 XIN, X1.1}; Net-(C3-Pad1) = {C3.1, R5.1, X1.3}; /XOUT = {R5.2, U3.21 XOUT}; X1.2 and X1.4 on GND. R5 = 1k 1% M1005 63mW (Yageo RC0402FR-071KL). I also rendered the Pico Rev3 schematic from the official Pico datasheet PDF (sha256 757ff485..., byte-identical to the live download) and read the crystal block visually: XIN -- X1 pin 1 with C16 to GND; X1 pin 3 -- node 'XR' with C17 to GND -- R14 (1K 63mW 1% M1005) -- XOUT. Identical. One addition the researcher missed: Pico also has R15, a NO-FIT resistor bridging XIN to XOUT directly (an unpopulated feedback-resistor option) — harmless, but worth knowing if you copy the Pico block wholesale. The IOVDD=3.3V tuning caveat is verbatim from both §2.16.1.1 and hardware guide §2.3."
+          },
+          {
+            "claim": "QSPI mapping: pin 56->flash 1 CS#, 55->2 SO/IO1, 54->3 WP#/IO2, 53->5 SI/IO0, 52->6 SCLK, 51->7 HOLD#/IO3; flash 4=GND, 8=VCC with its own 100nF (C8 on the Pico, C5 on the minimal design).",
+            "status": "REFUTED",
+            "note": "THE PIN MAPPING IS 100% CORRECT — this is the load-bearing part and it survives every check. Datasheet Table 616 confirms QSPI_SD3 51, QSPI_SCLK 52, QSPI_SD0 53, QSPI_SD2 54, QSPI_SD1 55, QSPI_CSn 56. Minimal netlist confirms each pairing to U2 by pinfunction name (U3.56<->U2.1 CS, U3.55<->U2.2 DO_IO1, U3.54<->U2.3 WP_IO2, U3.53<->U2.5 DI_IO0, U3.52<->U2.6 CLK, U3.51<->U2.7 HOLD_IO3, U2.4 on GND, U2.8 on +3V3). I rendered the Pico schematic and read the same mapping off U3 (W25Q16JVUXIQ). GD25Q32E Rev1.5 Table 1 gives the identical SOP8 order: 1 CS#, 2 SO(IO1), 3 WP#(IO2), 4 VSS, 5 SI(IO0), 6 SCLK, 7 HOLD#(IO3), 8 VCC. THE ONE ERROR: on the Pico the flash VCC decoupler is NOT C8. C5 is correct for the minimal design (2.54mm from U2 pin 8). On Pico Rev3 the flash decoupling is C15 (100n 6.3V M0603 X5R) plus C18 (2u2 M1005 X5R); I confirmed this both by rendering the schematic (both caps drawn on U3 pin 8) and via Appendix C 'Pico component locations', where C15/C18 sit next to U3 while C8/C9 sit next to U1 (RP2040) near the crystal. 'Keep R1/R2 close to the flash' is verbatim from guide §2.2."
+          },
+          {
+            "claim": "BOOTSEL: boot button pulls QSPI_SS_N (pin 56) to GND through a 1k series resistor; a 10k pull-up to 3V3 is provided as DNF.",
+            "status": "CONFIRMED",
+            "note": "Minimal netlist: /QSPI_SS = {R1.1, R2.2, U2.1 CS, U3.56}; R1.2 -> /USB_BOOT = J2.1; J2.2 on GND; R2.1 on +3V3. R1 = 1k, R2 = 10k. The R3-S1 BOM confirms R2 as 'NO-FIT' (the current KiCad files no longer carry a literal 'DNF' string, but the BOM line is unambiguous), so 'DNF' is substantively correct. Pico Rev3 rendered and read visually: SW1 = TP-1221U-K9K5325 tact switch (pins 1/2 to QSPI_SS side via R11, pins 3/4 to GND), R11 = 1K 1% M1005 63mW, R4 = NO-FIT pull-up to 3V3, plus TP6 test point. Caveat: the '1k limits current / prevents hard-shorting CS during SPI activity' rationale is the researcher's own inference — the guide never explains why 1k, it only states the value. 'Both R1 and R2 should be placed close to the flash chip' is verbatim from §2.2."
+          },
+          {
+            "claim": "For the GD25Q32E specifically, FIT the 10k QSPI_SS pull-up rather than leaving it DNF.",
+            "status": "CONFIRMED",
+            "note": "Both supporting quotes verified verbatim. Hardware guide §2.2: 'R2 is marked as DNF (Do Not Fit) on the schematic, as we have found that with this particular flash device, the external pull-up is unnecessary. However, if a different flash is used, it may become important to be able to insert a 10k-ohm resistor here, so it has been included just in case.' The guide also states verbatim the exact mechanism the researcher cites: 'When the RP2040 is powered up, its QSPI_SS pin will automatically default to a pull-up, but there is a short period of time during switch-on where the state of the QSPI_SS pin cannot be guaranteed.' GD25Q32E Rev1.5 (June 2025) Table 1 note 1 verbatim: 'CS# must be driven high if chip is not selected. Please don't leave CS# floating any time after power is on.' Recommendation is sound. ALSO NOTE GD25Q32E Table 1 note 2, which the researcher omitted: 'If WP# or HOLD# are unused, they must be driven high by the host, or an external pull-up resistor must be placed on the PCB' — satisfied in QSPI mode since RP2040 drives IO2/IO3, but relevant if you ever run the part in plain single-SPI."
+          },
+          {
+            "claim": "RUN is pin 26 with an internal pull-up; no external pull-up required, and neither reference design fits one.",
+            "status": "CONFIRMED",
+            "note": "Table 619: RUN, 26, Digital In (FT), IOVDD, reset state Pull-Up, 'Chip enable / reset'. §1.4.2 verbatim: 'Global asynchronous reset pin. Reset when driven low, run when driven high. If no external reset is required, this pin can be tied directly to IOVDD.' Minimal netlist: /RUN = {J4.29, U3.26} — nothing else. Pico Rev3: I rendered the RP2040 symbol's bottom pin bank and confirmed pin 26 goes straight to net label RUN with no components, and traced RUN to J0 pin 30 via the header pitch. Pico datasheet quantifies the internal pull-up as '~50 kOhm'. Two additions worth carrying: §2.12.5 says 'If RUN is not used, it should be tied high' — on both reference boards RUN is exposed on a header and left floating on the internal pull-up, which is accepted practice but is not literally 'tied high'. The claim that a large cap on RUN is not in any official reference design is correct for both boards I checked."
+          },
+          {
+            "claim": "TESTEN is pin 19 and must be tied directly to GND.",
+            "status": "CONFIRMED",
+            "note": "Table 619: TESTEN, 19, Digital In, IOVDD, reset state Pull-Down, 'Test enable (connect to Gnd)'. §1.4.2 verbatim: 'Factory test mode pin. Tie to GND.' Minimal netlist GND net includes U3.19. I also rendered the Pico Rev3 RP2040 symbol and visually confirmed pin 19 TESTEN goes straight to a ground symbol with no component. Both reference designs hard-ground it; do not rely on the internal pull-down."
+          },
+          {
+            "claim": "USB_DM = pin 46, USB_DP = pin 47; each needs a 27 ohm series resistor close to the chip; no external pull-up/pull-down needed.",
+            "status": "CONFIRMED",
+            "note": "Table 620: USB_DP 47, USB_DM 46, type USB IO, domain USB_VDD, '27-ohm series resistor required for USB operation'. §1.4.2 verbatim: 'A 27-ohm series termination resistor is required on each pin, but bus pull-ups and pull-downs are provided internally.' Table 614 repeats it for the USB IO pin type. Minimal netlist exactly as stated: Net-(U3-USB_DP) = {R3.2, U3.47}, /USB_D+ = {J1.3, R3.1}; Net-(U3-USB_DM) = {R4.2, U3.46}, /USB_D- = {J1.2, R4.1}; R3 = R4 = 27 ohm 1% M1005. Schematic note 'Make sure R3 and R4 are close to RP2040' confirmed verbatim in the .kicad_sch. Pico uses R12/R13 = 27R 1% M0603 50mW in the same position. The Pikkolo placement advice (USBLC6 on the edge-finger side of the 27R) is the researcher's own recommendation, not sourced, but is standard and correct practice."
+          },
+          {
+            "claim": "Pins that must be grounded/must not float: 19 TESTEN, 57 centre pad, USB_VDD 48 never unconnected, flash CS# never floating; no requirement to ground unused GPIOs because all GPIOs and the QSPI bank power up with defined pulls.",
+            "status": "REFUTED",
+            "note": "Parts (a) through (d) are all CONFIRMED and the headline conclusion ('no requirement to ground unused GPIOs') is also correct — there is no such requirement anywhere in the datasheet or the hardware guide. (a) TESTEN->GND per §1.4.2. (b) §1.4.2 GND verbatim: 'Single external ground connection, bonded to a number of internal ground pads on the RP2040 die', and Table 621 lists no other GND. (c) §2.9.4 verbatim: 'USB_VDD should not be left unconnected', and 'In applications where the USB PHY is never used, USB_VDD can be tied to any supply with a nominal voltage between 1.8V and 3.3V.' (d) GD25Q32E note 1 as above. THE ERROR IS IN (e): the parenthetical 'all GPIOs and the QSPI bank power up with defined pulls' is wrong for the QSPI data pins. I rendered Table 616 from the PDF to rule out a text-extraction artifact: QSPI_SD3 (51), QSPI_SD0 (53), QSPI_SD2 (54) and QSPI_SD1 (55) have a BLANK Reset State cell — no pull is specified. Only QSPI_SCLK (52, Pull-Down) and QSPI_CSn (56, Pull-Up) have defined reset pulls. GPIO0-29 Pull-Down and SWCLK/SWD Pull-Up are correct."
+          },
+          {
+            "claim": "GP number -> QFN-56 pin: GP0-7 = GP+2 (pins 2-9), GP8-15 = GP+3 (11-18), GP16-21 = GP+11 (27-32), GP22-29 = GP+12 (34-41).",
+            "status": "CONFIRMED",
+            "note": "I regex-extracted all 30 GPIO rows from Table 615 and diffed them against the claimed formula programmatically: 30 entries found, ZERO mismatches. GP26/27/28/29 = pins 38/39/40/41 and are ADC0/1/2/3 with dual IOVDD/ADC_AVDD power domain, as claimed. The gap list is also exactly right — pins 1, 10, 19, 20, 21, 22, 23, 24, 25, 26, 33 are the only non-GPIO pins in the 1-41 range, matching Tables 617/618/619/621. Independently corroborated by the RP2040 symbol pin numbering in the minimal design netlist (pinfunction strings carry both name and number, e.g. GPIO17_28) and by the Waveshare RP2040-LoRa schematic symbol."
+          },
+          {
+            "claim": "GP17 = QFN pin 28, Digital IO (FT), IOVDD domain, reset state Pull-Down — so the BOM's 'PE4259 ctrl = GP17' lands on pin 28 and sits LOW through reset/boot.",
+            "status": "CONFIRMED",
+            "note": "The electrical facts are confirmed: Table 615 gives GPIO17 = 28, Digital IO (FT), IOVDD, Pull-Down, 'User IO'. PE4259 truth table verified from the psemi datasheet Table 5: CTRL (pin 4) High -> RFC to RF1; CTRL Low -> RFC to RF2 — so a boot-time low selects the RF2 path, which is what the researcher tells you to check. BUT THE BOM PREMISE IS SUSPECT AND THIS IS A BOARD-SPIN RISK. Pikkolo says it clones the Waveshare rp2040-lora pinout. I read the actual Meshtastic variant at firmware-master/variants/rp2040/rp2040-lora/variant.h: it sets '#define SX126X_DIO2_AS_RF_SWITCH  // Antenna switch CTRL' and '#define SX126X_RXEN LORA_DIO4  // Antenna switch !CTRL via GPIO17', with the comment 'the antenna switch is wired and works with complementary-pin control logic. See PE4259 datasheet page 4'. So on the reference design GP17 drives the PE4259's COMPLEMENTARY pin (pin 6, /CTRL), while CTRL (pin 4) is driven by SX1262 DIO2 — not by GP17. PE4259 datasheet Table 6 confirms complementary mode exists and that pin 6 is the complement. If Pikkolo wires GP17 to pin 4 (CTRL) and ties pin 6 to 3V3 for single-pin mode, the stock Meshtastic rp2040-lora firmware will drive the switch backwards or leave it in an undefined state. Resolve which PE4259 pin GP17 actually lands on before fab."
+          },
+          {
+            "claim": "SWD debug pins are SWCLK = pin 24 and SWDIO/SWD = pin 25, both with internal pull-ups.",
+            "status": "CONFIRMED",
+            "note": "Table 618: SWCLK 24 Digital In (FT), SWD 25 Digital IO (FT), both IOVDD, both reset state Pull-Up. Both reference designs expose them as claimed — minimal: /SWCLK = {J4.33, U3.24}, /SWD = {J4.31, U3.25}; Pico brings them to the 3-pin J2 debug connector (CON_PICO_3W). The suggestion to add 2 test pads on the Pikkolo stick is advice, not a sourced claim, but is sensible given no debug connector."
+          },
+          {
+            "claim": "Minimum external BOM around the RP2040 (excluding flash and input LDO): 9x100nF, 2x1uF, 1x10uF bulk, 2x15pF C0G, 2x1k, 1x10k, 2x27R, 1x12MHz crystal, 1x QSPI flash, 1x momentary switch.",
+            "status": "CONFIRMED",
+            "note": "The headline count of 9x100nF is correct for the as-built official design: the R3-S1 BOM has 10x100nF total (C5,C6,C7,C9,C11,C12,C13,C14,C15,C16), of which C5 is the flash decoupler, leaving 9 on the MCU (7 on +3V3 because 48/49 share C9, 2 on +1V1). 2x1uF (C8,C10), 3x10uF total of which 1 (C17) is the 3V3 bulk, 2x15p, R1/R5 = 1k, R2 = 10k NO-FIT, R3/R4 = 27R, X1 12MHz, U2 flash — all match the shipped BOM. Two caveats: (1) the detail paragraph enumerates 8+2+1 = 11 100nF positions (the full-rule variant) while the headline says 9 (the as-built variant); both are defensible but the two numbers in one claim invite a BOM error, so pick one explicitly. (2) The official minimal design has NO momentary switch — BOOTSEL is a 2-pin Samtec TSW-102-07-G-S header (J2) shorted with a jumper. The momentary switch comes from Pico (SW1). Fine as a Pikkolo choice, just not 'derived from the official minimal design'."
+          },
+          {
+            "claim": "QFN-56 footprint: RP2040's ePad is smaller than a standard 0.4mm QFN-56 land pattern; Figure 167 gives 0.40mm pitch, 0.20mm pad width, 3.20x3.20mm centre pad, spans 5.40/6.00/7.75mm.",
+            "status": "CONFIRMED",
+            "note": "I rendered PDF p.609 (doc p.608) and read Figure 167 directly rather than trusting the text extraction. All five numbers are correct and correctly assigned: 0.40 is the pitch, 0.20 is the pad WIDTH (dimensioned on the short axis of a peripheral pad), 3.20x3.20 is the ePad, 5.40 is the pad-row span, 6.00 is inner-edge to inner-edge of opposing rows, 7.75 is outer-edge to outer-edge. The §5.1 NOTE is quoted verbatim and correctly. ONE THING TO KNOW BEFORE YOU COPY IT: Raspberry Pi's own minimal design does NOT use Figure 167 exactly. I parsed RPI_COMPILED:rpi_rp2040_vias from the shipped .kicad_pcb — its peripheral pads are 0.80 x 0.23mm on 0.40mm pitch with pin-1 centre at x=-3.4mm (outer span 7.60mm), and the ePad is broken into a grid of 0.6x0.6mm sub-pads with vias rather than one 3.20mm square. So 'match Figure 167' and 'match the official reference footprint' are two different targets; decide which one you are checking mesh.kicad_pcb against."
+          },
+          {
+            "claim": "USB differential impedance guidance (90 ohm, 0.8mm/0.15mm on 1mm 2-layer) conflicts with a 2.0mm 2-layer stackup; thicker than 1mm is 'probably not going to be compliant to the USB standard'.",
+            "status": "CONFIRMED",
+            "note": "Hardware guide §2.4.1 confirmed verbatim, including the 0.8mm track / 0.15mm gap / ~90 ohm figures on a 1mm board and the requirement for 'A solid, uninterrupted area of ground copper, stretching the entire length of the track'. The researcher's ellipsis is honest — the elided words are 'but your mileage may vary. It is likely to work in many applications,' which do not change the meaning. The '~1.9mm dielectric at 2.0mm' figure is the researcher's own arithmetic (INFERRED, not sourced) but is right for a 2-layer board with thin outer copper. The mitigations listed are sensible and consistent with the guide's own advice. Note this is a genuine, acknowledged risk rather than a defect — RPi themselves say to keep the run short and accept non-compliance."
+          },
+          {
+            "claim": "Bootrom flash probe uses 03h/24-bit/~1MHz cycling all four CPOL/CPHA combinations; device must also support 02h, 05h, 06h, 20h; GD25Q32E supports all of these; plus the fixed de-XIP sequence before 03h.",
+            "status": "CONFIRMED",
+            "note": "Hardware guide §2.6 confirmed verbatim, including the four-step de-XIP sequence exactly as the researcher transcribed it (CSn=1 IO[3:0]=0000 x32 clocks; CSn=0 IO[3:0]=1111 x32 clocks; CSn=1; CSn=0 MOSI=1 driven low-Z others Hi-Z x16 clocks) and the caution about warm reset with a flash left in continuous-read mode. GD25Q32E Rev1.5 command support independently verified against its own command table and section headings: 06H Write Enable (§7.1), 05H Read Status Register (§7.3), 03H Read Data Bytes with A23-A16/A15-A8/A7-A0 (§7.6), 02H Page Program (§7.13), 20H Sector Erase (§7.15). All five present with 24-bit addressing. UF2 drag-and-drop will work."
+          },
+          {
+            "claim": "XOSC needs no external enable (software sets CTRL_ENABLE; STARTUP_DELAY default 1ms is correct for 12MHz); the SX1262's 32MHz TCXO is a separate clock domain and must not be shared with XIN/XOUT.",
+            "status": "CONFIRMED",
+            "note": "§2.16.2 verbatim: 'The XOSC is disabled on chip startup and the RP2040 boots using the Ring Oscillator (ROSC). To start the XOSC, the programmer must set the CTRL_ENABLE register.' §2.16.3 verbatim: 'The 1ms default is sufficient for the RP2040 reference design ... which runs the XOSC at 12MHz.' §1.4.2 confirms the 12MHz bootloader requirement. SX1262 datasheet confirms DIO3 is a 'Multi-purpose digital I/O - external TCXO supply voltage' with a programmable tcxoVoltage set by SetDIO3AsTCXOCtrl, so the Y2-from-DIO3-at-1.8V architecture is real. FIRMWARE GOTCHA the researcher did not flag: in the Meshtastic rp2040-lora variant.h that Pikkolo is cloning, line 59 is '// #define SX126X_DIO3_TCXO_VOLTAGE 1.8' — COMMENTED OUT. If Pikkolo's Y2 is powered from DIO3 (as the project description states) rather than from a rail, the stock rp2040-lora variant will never enable DIO3 and the TCXO will not start. Either power Y2 from a rail or plan on a custom variant that uncomments that line."
+          }
+        ],
+        "corrections": [
+          "Minimal design C5 (100nF): it is the FLASH VCC decoupler, not an LDO-output cap. Measured 2.54mm from U2 pin 8 (VCC) and 9.57mm from U1 (NCP1117) in the shipped RPI-RP2040-MINIMAL_R3-S1.kicad_pcb. The LDO has only C1 (10uF, VBUS input, 3.31mm from U1) and C4 (10uF, 3V3 output, 3.00mm from U1) — there is NO 100nF at the LDO output at all. Claim 4 and claim 10 contradicted each other on C5; claim 10 was the correct one.",
+          "Minimal design C17 (10uF, +3V3): it is NOT 'near the chip'. Measured 21.81mm from the nearest RP2040 pad (and 5.30mm from J2, 8.13mm from U2). It is board-level 3V3 bulk over by the flash/USB_BOOT header, not local MCU bulk. If Pikkolo wants local bulk at the RP2040 it must place its own — the reference design does not have one there.",
+          "Pico Rev3 flash VCC decoupling is C15 (100nF, 6.3V, 10%, M0603, X5R) plus C18 (2u2, 6.3V, 20%, M1005, X5R), NOT C8. Confirmed by rendering the Appendix B schematic (both caps drawn on U3 pin 8) and by Appendix C 'Pico component locations', where C15/C18 sit adjacent to U3 while C8/C9 sit adjacent to U1 (RP2040) near X1. The minimal design's flash decoupler is C5, which is correct as stated.",
+          "RP2040 Table 616 does NOT specify a reset-state pull for the four QSPI data pins. QSPI_SD3 (51), QSPI_SD0 (53), QSPI_SD2 (54) and QSPI_SD1 (55) all have a blank Reset State cell — verified by rendering the table from the PDF, not just the text extraction. Only QSPI_SCLK (52, Pull-Down) and QSPI_CSn (56, Pull-Up) have defined reset pulls. The conclusion that unused GPIOs need no external grounding still stands; the blanket statement that 'the QSPI bank powers up with defined pulls' does not."
+        ],
+        "overall": "I verified all 24 findings against primary sources I fetched and hash-checked myself. Four source PDFs/archives were re-downloaded from the official Raspberry Pi endpoints and are byte-identical (sha256) to the local copies the researcher used: rp2040-datasheet.pdf (be56fbb7...), hardware-design-with-rp2040.pdf (6523a2eb...), pico-datasheet.pdf (757ff485...) and Minimal-KiCAD.zip (8fdae5c1...). So the sources are authentic and current, not stale mirrors. I did not take the researcher's netlist export on faith — I re-parsed the shipped .kicad_sch, .kicad_pcb and BOM.xlsx directly, and computed pad-to-pad distances from the PCB geometry. Where text extraction could mislead (Table 616 reset states, Figure 167 dimensions, the Pico crystal and BOOTSEL blocks), I rendered the PDF pages and read them visually.\n\nRESULT: 21 CONFIRMED, 3 REFUTED, 0 UNVERIFIABLE. Critically, EVERY PIN NUMBER IS CORRECT. All 30 GPIO-to-QFN mappings were diffed programmatically against Table 615 with zero mismatches; the six QSPI pins, the power pins, XIN/XOUT, RUN, TESTEN, SWCLK/SWD and USB_DM/DP all check out against Tables 615-621. The high-risk crystal topology (1k on the XOUT side, load cap on the crystal side of the resistor) is exactly right and I confirmed it independently in both reference designs.\n\nThe three refutations are all in secondary reference-designator detail, not in pin numbers: (1) claim 4 misplaces the minimal design's C5 and C17 — and it directly contradicts claim 10 about C5, with claim 10 being the correct one; (2) claim 10 names the wrong Pico designator for flash decoupling (C15+C18, not C8); (3) claim 15 overstates QSPI reset-state pulls (the four data pins have no specified pull). None of these will cause a board spin on their own, but claim 4's internal contradiction means the researcher did not actually cross-check the PCB placement they said they verified — treat other \"verified from placement\" statements with corresponding suspicion.\n\nTWO PROJECT-LEVEL RISKS THAT ARE MORE DANGEROUS THAN ANY OF THE REFUTATIONS, both found by checking the Meshtastic firmware the board must run rather than the datasheets:\n\n1. PE4259 CONTROL WIRING. The BOM's \"ctrl = GP17\" is very likely wrong for a board cloning the Waveshare rp2040-lora pinout. firmware-master/variants/rp2040/rp2040-lora/variant.h defines SX126X_DIO2_AS_RF_SWITCH (PE4259 CTRL, pin 4, driven by the SX1262) together with SX126X_RXEN = GPIO17 commented \"Antenna switch !CTRL via GPIO17\", and the file explicitly says the switch runs in complementary-pin control mode. So GP17 belongs on PE4259 pin 6 (the complement), not pin 4. Wiring GP17 to CTRL and strapping pin 6 to VDD for single-pin mode will leave the RF switch mis-driven under stock firmware. Confirm this against the Waveshare schematic before fab — this is exactly the class of error that costs a spin.\n\n2. TCXO SUPPLY. The project states Y2 must run at 1.8V from SX1262 DIO3, but the same variant.h has SX126X_DIO3_TCXO_VOLTAGE commented out. Stock rp2040-lora firmware will never enable DIO3, so a DIO3-powered TCXO will not start and the radio will not lock. Either power Y2 from a rail or commit to a custom variant.\n\nLower-priority items worth carrying forward: RPi's own reference footprint (0.80 x 0.23mm pads, 7.60mm outer span, segmented via-stitched ePad) differs from datasheet Figure 167 (0.875 x 0.20mm pads, 7.75mm span, solid 3.20mm ePad), so decide which target mesh.kicad_pcb is being checked against; Table 634 footnote b (DVDD transients within +/-100mV) is unquoted but relevant given SX1262 TX current steps on a shared 3V3; the official minimal design uses a jumper header for BOOTSEL, not a tact switch, so claim 19's \"1 x momentary switch\" comes from Pico; and claim 19 states two different 100nF counts (9 in the headline, 11 in the detail) — pick one before generating the BOM."
+      }
+    }
+  ],
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Research"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Verify"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "research:meshtastic-variant",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a8899b410c864ba5f",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787465167518,
+      "queuedAt": 1787465167503,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Meshtastic firmware `rp2040-lora` (Waveshare RP2040-LoRa) v…",
+      "promptPreview": "PROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic firmware.\nBoard is 2.0mm thick, ~20x75mm, 2-layer, and plugs directly into a USB-A port via PCB EDGE FINGERS\n(there is no USB connector part on the BOM).\nOther parts: GD…",
+      "lastProgressAt": 1787465542952,
+      "tokens": 69187,
+      "toolCalls": 35,
+      "durationMs": 375432,
+      "resultPreview": "{\"topic\":\"Meshtastic firmware `rp2040-lora` (Waveshare RP2040-LoRa) variant — exact GPIO assignments, verified against upstream source\",\"findings\":[{\"claim\":\"The variant is NOT at variants/rp2040-lora/ — it lives at variants/rp2040/rp2040-lora/, and consists of exactly two files: variant.h and platformio.ini. There is no variant.cpp.\",\"detail\":\"Confirmed via GitHub contents API on meshtastic/firmw…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "research:sx1262-refdesign",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "ab2253f02d6138c57",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787465167518,
+      "queuedAt": 1787465167503,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "SX1262IMLTRT (QFN-24-EP) US915 reference-design topology: i…",
+      "promptPreview": "PROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic firmware.\nBoard is 2.0mm thick, ~20x75mm, 2-layer, and plugs directly into a USB-A port via PCB EDGE FINGERS\n(there is no USB connector part on the BOM).\nOther parts: GD…",
+      "lastProgressAt": 1787466315069,
+      "tokens": 195840,
+      "toolCalls": 87,
+      "durationMs": 1145183,
+      "resultPreview": "{\"topic\":\"SX1262IMLTRT (QFN-24-EP) US915 reference-design topology: internal-LDO mode, TCXO on DIO3, single-ended high-power front end with PE4259 SPDT — pin-by-pin connections, LDO vs DC-DC deltas, TX harmonic filter / RX balun topology and 902–928 MHz component values, and DIO2-vs-MCU-GPIO RF switch control\",\"findings\":[{\"claim\":\"Semtech's SX1262 application/reference schematic is a fixed, well-…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "research:rp2040-minimal",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a899849d9c4875a26",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787465167518,
+      "queuedAt": 1787465167503,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "RP2040 QFN-56 required minimum external circuit (power, dec…",
+      "promptPreview": "PROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic firmware.\nBoard is 2.0mm thick, ~20x75mm, 2-layer, and plugs directly into a USB-A port via PCB EDGE FINGERS\n(there is no USB connector part on the BOM).\nOther parts: GD…",
+      "lastProgressAt": 1787465835612,
+      "tokens": 130388,
+      "toolCalls": 52,
+      "durationMs": 665726,
+      "resultPreview": "{\"topic\":\"RP2040 QFN-56 required minimum external circuit (power, decoupling, VREG, crystal, QSPI flash, BOOTSEL, RUN, TESTEN, USB, GPIO pin map) — for Pikkolo Mesh Stick Rev A\",\"findings\":[{\"claim\":\"RP2040 QFN-56 power pin numbers are fixed by datasheet Table 621 and there are 12 supply pins plus the center GND pad (pin 57).\",\"detail\":\"IOVDD = pins 1, 10, 22, 33, 42, 49 (6 pins). DVDD = pins 23, …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "research:sk9822-led",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a2567b3a2e8c52da7",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787465167518,
+      "queuedAt": 1787465167503,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "SK9822-EC20 (2020) addressable LED: pinout, APA102-2020 com…",
+      "promptPreview": "PROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic firmware.\nBoard is 2.0mm thick, ~20x75mm, 2-layer, and plugs directly into a USB-A port via PCB EDGE FINGERS\n(there is no USB connector part on the BOM).\nOther parts: GD…",
+      "lastProgressAt": 1787466376934,
+      "tokens": 160735,
+      "toolCalls": 81,
+      "durationMs": 1207047,
+      "resultPreview": "{\"topic\":\"SK9822-EC20 (2020) addressable LED: pinout, APA102-2020 compatibility, 3.3V logic drive from 5V USB VBUS, decoupling, and SK9822-vs-APA102 protocol differences for D1 on the Pikkolo Mesh Stick Rev A\",\"findings\":[{\"claim\":\"SK9822-EC20 pinout is 6 pads in two columns of three: 1=SDO, 2=GND, 3=SDI, 4=CKI, 5=VDD, 6=CKO\",\"detail\":\"Datasheet §5 PIN configuration table: 1 SDO (control signal ou…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "research:usb-edge-esd",
+      "phaseIndex": 1,
+      "phaseTitle": "Research",
+      "agentId": "a8e3c2b79febaf6a0",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787465167519,
+      "queuedAt": 1787465167503,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "USB-A plug formed from PCB edge fingers on a 2.0 mm board (…",
+      "promptPreview": "PROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic firmware.\nBoard is 2.0mm thick, ~20x75mm, 2-layer, and plugs directly into a USB-A port via PCB EDGE FINGERS\n(there is no USB connector part on the BOM).\nOther parts: GD…",
+      "lastProgressAt": 1787466271437,
+      "tokens": 117994,
+      "toolCalls": 59,
+      "durationMs": 1101550,
+      "resultPreview": "{\"topic\":\"USB-A plug formed from PCB edge fingers on a 2.0 mm board (Pikkolo Mesh Stick Rev A), plus the ESD / power-entry circuit for RP2040 + SX1262\",\"findings\":[{\"claim\":\"The USB-A plug has exactly 4 contacts, numbered 1..4 across the edge, in the order VBUS, D-, D+, GND.\",\"detail\":\"USB 2.0 spec Table 6-1 (USB Connector Termination Assignment): contact 1 = VBUS (red), 2 = D- (white), 3 = D+ (gr…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "verify:meshtastic-variant",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "afb28646f572338cf",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787465542978,
+      "queuedAt": 1787465542962,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I fetched and read every primary source myself: variants/rp…",
+      "promptPreview": "You are an adversarial technical reviewer for a PCB schematic that will be FABRICATED.\nA wrong pin number costs a board spin, so your job is to REFUTE, not to agree.\n\n\nPROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic f…",
+      "lastProgressAt": 1787466352734,
+      "tokens": 131961,
+      "toolCalls": 56,
+      "durationMs": 809755,
+      "resultPreview": "{\"corrections\":[\"PE4259 CONTROL PIN MAPPING (board-spin class error). Finding 4 states the upstream arrangement is 'exactly the PE4259 arrangement your BOM describes (ctrl = GP17)'. It is not. Per the PE4259 datasheet (pSemi DOC-03694-5.01, Table 7, p.11): pin 1 = RF1, pin 2 = GND, pin 3 = RF2, pin 4 = CTRL, pin 5 = RFC, pin 6 = /CTRL-or-VDD. In the upstream rp2040-lora design the SX1262's DIO2 dr…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "verify:rp2040-minimal",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a275d2329d73d0962",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787465835616,
+      "queuedAt": 1787465835614,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I verified all 24 findings against primary sources I fetche…",
+      "promptPreview": "You are an adversarial technical reviewer for a PCB schematic that will be FABRICATED.\nA wrong pin number costs a board spin, so your job is to REFUTE, not to agree.\n\n\nPROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic f…",
+      "lastProgressAt": 1787466716930,
+      "tokens": 172924,
+      "toolCalls": 72,
+      "durationMs": 881314,
+      "resultPreview": "{\"verdicts\":[{\"claim\":\"RP2040 QFN-56 power pins per Table 621: IOVDD 1,10,22,33,42,49; DVDD 23,50; VREG_VIN 44; VREG_VOUT 45; USB_VDD 48; ADC_AVDD 43; GND 57 (centre pad only, no other ground pin).\",\"status\":\"CONFIRMED\",\"note\":\"Verified in RP2040 Datasheet Table 621 (p.613 of doc / PDF p.615). Source PDF sha256 be56fbb7... is byte-identical to the current https://datasheets.raspberrypi.com/rp2040/…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "verify:usb-edge-esd (retry 5)",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a776ab6937e144348",
+      "model": "claude-opus-5[1m]",
+      "state": "error",
+      "startedAt": 1787466271447,
+      "queuedAt": 1787466271444,
+      "attempt": 6,
+      "lastAttemptReason": "stalled",
+      "promptPreview": "You are an adversarial technical reviewer for a PCB schematic that will be FABRICATED.\nA wrong pin number costs a board spin, so your job is to REFUTE, not to agree.\n\n\nPROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic f…",
+      "lastProgressAt": 1787473115484,
+      "error": "stalled — no progress for 180000ms",
+      "tokens": 121485,
+      "toolCalls": 51,
+      "durationMs": 6844037
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "verify:sx1262-refdesign (retry 5)",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a23bb17f85c603278",
+      "model": "claude-opus-5[1m]",
+      "state": "error",
+      "startedAt": 1787466315077,
+      "queuedAt": 1787466315075,
+      "attempt": 6,
+      "lastAttemptReason": "stalled",
+      "promptPreview": "You are an adversarial technical reviewer for a PCB schematic that will be FABRICATED.\nA wrong pin number costs a board spin, so your job is to REFUTE, not to agree.\n\n\nPROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic f…",
+      "lastProgressAt": 1787473115484,
+      "error": "stalled — no progress for 180000ms",
+      "tokens": 172127,
+      "toolCalls": 77,
+      "durationMs": 6800407
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "verify:sk9822-led (retry 5)",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a131d48aad7aca51a",
+      "model": "claude-opus-5[1m]",
+      "state": "error",
+      "startedAt": 1787466376949,
+      "queuedAt": 1787466376945,
+      "attempt": 6,
+      "lastAttemptReason": "stalled",
+      "promptPreview": "You are an adversarial technical reviewer for a PCB schematic that will be FABRICATED.\nA wrong pin number costs a board spin, so your job is to REFUTE, not to agree.\n\n\nPROJECT CONTEXT — \"Pikkolo Mesh Stick\" Rev A:\nA USB-stick-form Meshtastic node. RP2040 (U1, QFN-56) + Semtech SX1262IMLTRT (U2, QFN-24-EP), US915 band.\nIt clones the Waveshare `rp2040-lora` variant pinout as used by the Meshtastic f…",
+      "lastProgressAt": 1787473115376,
+      "error": "stalled — no progress for 180000ms",
+      "tokens": 163688,
+      "toolCalls": 47,
+      "durationMs": 6738426
+    }
+  ],
+  "totalTokens": 1436329,
+  "totalToolCalls": 617
+}
