@@ -198,9 +198,34 @@ def unit_count(lib_id):
     return max(us) if us else 1
 
 
-# library rotation -> unit vector pointing from the connection point toward the body,
-# already converted into schematic space (+Y down)
-_DIR = {0: (1.0, 0.0), 90: (0.0, -1.0), 180: (-1.0, 0.0), 270: (0.0, 1.0)}
+# A pin's library rotation -> the unit vector, in LIBRARY space (+Y up), pointing from
+# the connection point toward the body.
+_PINDIR = {0: (1.0, 0.0), 90: (0.0, 1.0), 180: (-1.0, 0.0), 270: (0.0, -1.0)}
+
+
+def xform(angle, lx, ly):
+    """
+    Library coordinate -> schematic offset, for a symbol placed at `angle` degrees.
+
+    KiCad's symbol orientations are the transform matrices in SCH_SYMBOL::SetOrientation,
+    applied to a library space that is +Y up against a schematic that is +Y down:
+
+        0 deg   ( lx, -ly)      180 deg  (-lx,  ly)
+        90 deg  (-ly, -lx)      270 deg  ( ly,  lx)
+
+    The same matrix carries direction vectors, which is how a stub knows which way to
+    point once its symbol has been turned.
+    """
+    a = angle % 360
+    if a == 0:
+        return (lx, -ly)
+    if a == 90:
+        return (-ly, -lx)
+    if a == 180:
+        return (-lx, ly)
+    if a == 270:
+        return (ly, lx)
+    raise ValueError("only 0/90/180/270 are supported, got %r" % angle)
 
 
 def uid(*parts):
@@ -213,8 +238,9 @@ def _esc(s):
 
 class Part:
     def __init__(self, ref, lib_id, x, y, value, footprint, props, dnp, in_bom,
-                 unit=1, reference=None):
+                 unit=1, reference=None, angle=0):
         self.ref, self.lib_id, self.x, self.y = ref, lib_id, float(x), float(y)
+        self.angle = int(angle) % 360
         self.value, self.footprint = value, footprint
         self.props, self.dnp, self.in_bom = props, dnp, in_bom
         self.unit = unit
@@ -228,27 +254,35 @@ class Part:
     def pin_xy(self, num):
         """Absolute schematic coordinate of a pin's connection point."""
         p = self.pins[num]
-        return (round(self.x + p["x"], 4), round(self.y - p["y"], 4))
+        dx, dy = xform(self.angle, p["x"], p["y"])
+        return (round(self.x + dx, 4), round(self.y + dy, 4))
 
     def stub_dir(self, num):
         """Unit vector pointing away from the body, for drawing the stub."""
-        dx, dy = _DIR[self.pins[num]["rot"]]
+        lx, ly = _PINDIR[self.pins[num]["rot"]]
+        dx, dy = xform(self.angle, lx, ly)
         return (-dx, -dy)
 
 
 class Sch:
-    def __init__(self, paper="A2", project="mesh", title=""):
+    def __init__(self, paper="A2", project="mesh", title="", rev="", date="",
+                 company="", comments=()):
         self.paper, self.project, self.title = paper, project, title
+        self.rev, self.date, self.company = rev, date, company
+        self.comments = list(comments)
         self.uuid = uid("sheet", project)
         self.parts = {}
         self.conns = []        # (ref, pinnum, net)
         self.ncs = []          # (ref, pinnum)
         self.texts = []        # (x, y, string, size)
         self.boxes = []        # (x, y, w, h)
+        self.juncs = []        # (x, y)
+        self.wires = []        # ((x1, y1), (x2, y2)) explicit segments
+        self.quiet = set()     # (ref, pinnum) whose stub is drawn without a label
         self.stub = 3.81
 
     def place(self, ref, lib_id, x, y, value=None, footprint=None,
-              props=None, dnp=False, in_bom=True, unit=1, reference=None):
+              props=None, dnp=False, in_bom=True, unit=1, reference=None, angle=0):
         if ref in self.parts:
             raise ValueError("duplicate reference %s" % ref)
         # Library pin offsets are multiples of 1.27, so an origin off the 2.54 grid
@@ -257,7 +291,7 @@ class Sch:
             if abs(round(v / 2.54) * 2.54 - v) > 1e-6:
                 raise ValueError("%s: %s=%g is not on the 2.54mm grid" % (ref, axis, v))
         p = Part(ref, lib_id, x, y, value, footprint, props or {}, dnp, in_bom,
-                 unit=unit, reference=reference)
+                 unit=unit, reference=reference, angle=angle)
         self.parts[ref] = p
         return p
 
@@ -270,6 +304,42 @@ class Sch:
             if num not in self.parts[ref].pins:
                 raise KeyError("%s has no pin %s (net %s)" % (ref, num, net))
             self.conns.append((ref, num, net))
+
+    def quiet_pin(self, *pin_refs):
+        """
+        Draw this pin's stub but no net label on it.
+
+        Used where a wire already carries the connection visibly -- a series chain whose
+        stubs butt together reads as a chain, and repeating the net name at every joint
+        just makes it unreadable. audit() enforces that every net keeps at least one
+        visible label, because that label is what names the net in KiCad's netlist.
+        """
+        for pr in pin_refs:
+            ref, num = pr.rsplit(".", 1)
+            if ref not in self.parts:
+                raise KeyError("no part %s" % ref)
+            if num not in self.parts[ref].pins:
+                raise KeyError("%s has no pin %s" % (ref, num))
+            self.quiet.add((ref, num))
+
+    def junction(self, x, y):
+        self.juncs.append((round(float(x), 4), round(float(y), 4)))
+
+    def wire(self, *points):
+        """
+        wire((x1, y1), (x2, y2), ...) -- an explicit polyline, for the connections a
+        chain of stubs cannot express: a parallel branch, a feedback leg, a rail bus.
+
+        Connectivity still comes from the net labels, so a wire that lands somewhere
+        unintended shows up in verify_netlist.py as a merged net rather than as silence.
+        """
+        pts = [(round(float(a), 4), round(float(b), 4)) for a, b in points]
+        for a, b in zip(pts, pts[1:]):
+            if a[0] != b[0] and a[1] != b[1]:
+                raise ValueError("wire segment %s->%s is neither horizontal nor vertical"
+                                 % (a, b))
+            if a != b:
+                self.wires.append((a, b))
 
     def no_connect(self, *pin_refs):
         for pr in pin_refs:
@@ -313,6 +383,16 @@ class Sch:
                     errs.append("%s stacked pins %s driven to different nets: %s"
                                 % (ref, ",".join(nums), sorted(nets)))
 
+        # a net whose every label was silenced would be auto-named by KiCad
+        labelled = {}
+        for ref, num, net in self.conns:
+            labelled.setdefault(net, False)
+            if (ref, num) not in self.quiet:
+                labelled[net] = True
+        for net, ok in sorted(labelled.items()):
+            if not ok:
+                errs.append("net %s has no visible label: every pin on it is quiet" % net)
+
         # two different pins landing on the same coordinate across parts = accidental short
         occupied = {}
         for ref, p in self.parts.items():
@@ -346,7 +426,7 @@ class Sch:
         A = L.append
         A("\t(symbol")
         A('\t\t(lib_id "%s")' % p.lib_id)
-        A("\t\t(at %g %g 0)" % (p.x, p.y))
+        A("\t\t(at %g %g %d)" % (p.x, p.y, p.angle))
         A("\t\t(unit %d)" % p.unit)
         A("\t\t(body_style 1)")
         A("\t\t(exclude_from_sim no)")
@@ -369,15 +449,30 @@ class Sch:
         # Keep visible fields off the stub labels. Two-pin parts are vertical with stubs
         # above and below, so their fields go to the right; bigger parts stack both
         # fields above the body, left-aligned to clear the centred top-pin labels.
-        maxx = max((abs(pp["x"]) for pp in p.pins.values()), default=2.54)
-        maxy = max((abs(pp["y"]) for pp in p.pins.values()), default=2.54)
-        rots = {pp["rot"] for pp in p.pins.values()}
-        if len(p.pins) <= 2 and rots <= {90, 270}:
+        # measure the body in SCHEMATIC space, so a turned part's fields still clear it
+        sxy = [xform(p.angle, pp["x"], pp["y"]) for pp in p.pins.values()]
+        maxx = max((abs(a) for a, _ in sxy), default=2.54)
+        maxy = max((abs(b) for _, b in sxy), default=2.54)
+        xs = {round(a, 3) for a, _ in sxy}
+        ys = {round(b, 3) for _, b in sxy}
+        small = len(p.pins) <= 2
+        if small and xs == {0.0}:
             # vertical two-pin part: stubs run up and down, so the right side is free
             shown = {"Reference": (maxx + 2.54, -1.27), "Value": (maxx + 2.54, 1.27)}
+            just = "left"
+        elif small and ys == {0.0}:
+            # horizontal two-pin part: stubs run left and right, so stack above and below
+            shown = {"Reference": (0.0, -3.175), "Value": (0.0, 3.175)}
+            just = "center"
         else:
             # everything else: stack both fields above, clear of the top stubs' labels
             shown = {"Reference": (-maxx, -maxy - 12.7), "Value": (-maxx, -maxy - 10.16)}
+            just = "left"
+        # KiCad turns a symbol's field text with the symbol, so the stored angle has to
+        # cancel the placement angle for the text to stay readable left-to-right. Only the
+        # quarter turns need cancelling; a 180 flip leaves text the right way up already,
+        # and cancelling it there renders the field upside down.
+        text_ang = (360 - p.angle) % 360 if p.angle in (90, 270) else 0
         for k, v in fields.items():
             if k.startswith("ki_") or k == "Description":
                 hide = True
@@ -390,7 +485,7 @@ class Sch:
             else:
                 ax, ay = p.x, p.y
             A('\t\t(property "%s" "%s"' % (k, _esc(v)))
-            A("\t\t\t(at %g %g 0)" % (ax, ay))
+            A("\t\t\t(at %g %g %d)" % (ax, ay, text_ang))
             if hide:
                 A("\t\t\t(hide yes)")
             A("\t\t\t(show_name no)")
@@ -399,7 +494,8 @@ class Sch:
             A("\t\t\t\t(font")
             A("\t\t\t\t\t(size 1.27 1.27)")
             A("\t\t\t\t)")
-            A("\t\t\t\t(justify left)")
+            if just != "center":                  # KiCad has no `center` token; it is the default
+                A("\t\t\t\t(justify %s)" % just)
             A("\t\t\t)")
             A("\t\t)")
         for num in p.pins:
@@ -426,9 +522,18 @@ class Sch:
         A('\t(generator_version "10.0")')
         A('\t(uuid "%s")' % self.uuid)
         A('\t(paper "%s")' % self.paper)
-        if self.title:
+        if self.title or self.rev or self.date or self.company or self.comments:
             A("\t(title_block")
-            A('\t\t(title "%s")' % _esc(self.title))
+            if self.title:
+                A('\t\t(title "%s")' % _esc(self.title))
+            if self.date:
+                A('\t\t(date "%s")' % _esc(self.date))
+            if self.rev:
+                A('\t\t(rev "%s")' % _esc(self.rev))
+            if self.company:
+                A('\t\t(company "%s")' % _esc(self.company))
+            for i, c in enumerate(self.comments[:9], start=1):
+                A('\t\t(comment %d "%s")' % (i, _esc(c)))
             A("\t)")
 
         A("\t(lib_symbols")
@@ -466,7 +571,33 @@ class Sch:
             A('\t\t(uuid "%s")' % uid("txt", x, y, s))
             A("\t)")
 
-        # one stub + label per netted pin position
+        for i, ((x1, y1), (x2, y2)) in enumerate(self.wires):
+            A("\t(wire")
+            A("\t\t(pts")
+            A("\t\t\t(xy %g %g) (xy %g %g)" % (x1, y1, x2, y2))
+            A("\t\t)")
+            A("\t\t(stroke")
+            A("\t\t\t(width 0)")
+            A("\t\t\t(type default)")
+            A("\t\t)")
+            A('\t\t(uuid "%s")' % uid("seg", x1, y1, x2, y2, i))
+            A("\t)")
+
+        for (jx, jy) in sorted(set(self.juncs)):
+            A("\t(junction")
+            A("\t\t(at %g %g)" % (jx, jy))
+            A("\t\t(diameter 0)")
+            A("\t\t(color 0 0 0 0)")
+            A('\t\t(uuid "%s")' % uid("junc", jx, jy))
+            A("\t)")
+
+        # one stub per netted pin position, labelled unless every pin there is quiet
+        loud = {}
+        for ref, num, net in self.conns:
+            pos = self.parts[ref].pin_xy(num)
+            if (ref, num) not in self.quiet:
+                loud[pos] = True
+            loud.setdefault(pos, False)
         done = set()
         for ref, num, net in self.conns:
             p = self.parts[ref]
@@ -486,6 +617,8 @@ class Sch:
             A("\t\t)")
             A('\t\t(uuid "%s")' % uid("wire", ref, num))
             A("\t)")
+            if not loud[(x0, y0)]:
+                continue
             ang = {(1, 0): 0, (0, -1): 90, (-1, 0): 180, (0, 1): 270}[(dx, dy)]
             just = "left" if ang in (0, 90) else "right"
             A('\t(label "%s"' % _esc(net))
