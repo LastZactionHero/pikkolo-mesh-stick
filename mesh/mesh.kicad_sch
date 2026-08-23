@@ -6832,86 +6832,6 @@
 	)
 	(wire
 		(pts
-			(xy 33.02 128.27) (xy 33.02 124.46)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3da5f10b-2b56-5c4a-8d42-5c46091a0920")
-	)
-	(label "VBUS"
-		(at 33.02 124.46 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ba7d7583-3bcc-55ca-9683-ccc4b38c9394")
-	)
-	(wire
-		(pts
-			(xy 33.02 135.89) (xy 33.02 139.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f104169c-23be-5930-b259-e96bdb5c8d5b")
-	)
-	(label "GND"
-		(at 33.02 139.7 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "7cf8de24-d79d-5f58-8741-8f33f6b67905")
-	)
-	(wire
-		(pts
-			(xy 60.96 128.27) (xy 60.96 124.46)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "975c38fc-abb2-51de-a870-00c94da17e07")
-	)
-	(label "VBUS"
-		(at 60.96 124.46 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ccb5bba3-0f57-5eb7-a511-57f13c1106e2")
-	)
-	(wire
-		(pts
-			(xy 60.96 135.89) (xy 60.96 139.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a98d05a1-fbd1-579f-8475-269f8e05db16")
-	)
-	(label "GND"
-		(at 60.96 139.7 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "7e283d74-6341-5fb1-8840-98919f0ffe4e")
-	)
-	(wire
-		(pts
 			(xy 104.14 114.3) (xy 100.33 114.3)
 		)
 		(stroke
@@ -7298,9 +7218,9 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "5875d39c-b955-54e7-8616-93151040368f")
+		(uuid "975c38fc-abb2-51de-a870-00c94da17e07")
 	)
-	(label "+3V3_RF"
+	(label "VBUS"
 		(at 91.44 160.02 90)
 		(effects
 			(font
@@ -7308,7 +7228,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4221b798-164d-50fe-bc29-3e767fb0070c")
+		(uuid "ccb5bba3-0f57-5eb7-a511-57f13c1106e2")
 	)
 	(wire
 		(pts
@@ -7318,7 +7238,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a3824305-380f-5b11-8c66-7613744aa259")
+		(uuid "a98d05a1-fbd1-579f-8475-269f8e05db16")
 	)
 	(label "GND"
 		(at 91.44 175.26 270)
@@ -7328,7 +7248,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "9ea8db83-9b59-5532-9c3f-32d12dadc835")
+		(uuid "7e283d74-6341-5fb1-8840-98919f0ffe4e")
 	)
 	(wire
 		(pts
@@ -12482,186 +12402,6 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 91.44 167.64 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "8cd387a1-19ab-56d5-95f5-d47c38b87393")
-		(property "Reference" "C14"
-			(at 93.98 166.37 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "100n"
-			(at 93.98 168.91 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_keywords" "cap capacitor"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_fp_filters" "C_*"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "MPN" "CL05B104KO5NNNC"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Manufacturer" "Samsung"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C1525"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Dielectric" "X7R"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Tolerance" "10%"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Voltage" "16V"
-			(at 91.44 167.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "9e0cc71e-5846-50c3-9eb8-07bf1715f3d7")
-		)
-		(pin "2"
-			(uuid "b58fb358-42fa-551b-be9e-9581f8ac9e73")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "C14")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
 		(at 91.44 132.08 0)
 		(unit 1)
 		(body_style 1)
@@ -12682,7 +12422,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1u"
+		(property "Value" "4u7"
 			(at 93.98 133.35 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12693,7 +12433,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 91.44 132.08 0)
 			(hide yes)
 			(show_name no)
@@ -12717,7 +12457,7 @@
 				(justify left)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" "decoupling: U5 pin 1 VIN"
 			(at 91.44 132.08 0)
 			(hide yes)
 			(show_name no)
@@ -12753,7 +12493,7 @@
 				(justify left)
 			)
 		)
-		(property "MPN" "CL05A105KA5NQNC"
+		(property "MPN" "CL10A475KO8NNNC"
 			(at 91.44 132.08 0)
 			(hide yes)
 			(show_name no)
@@ -12777,7 +12517,7 @@
 				(justify left)
 			)
 		)
-		(property "LCSC" "C52923"
+		(property "LCSC" "C19666"
 			(at 91.44 132.08 0)
 			(hide yes)
 			(show_name no)
@@ -12813,7 +12553,7 @@
 				(justify left)
 			)
 		)
-		(property "Voltage" "25V"
+		(property "Voltage" "16V"
 			(at 91.44 132.08 0)
 			(hide yes)
 			(show_name no)
@@ -14076,7 +13816,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 33.02 132.08 0)
+		(at 91.44 167.64 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -14084,9 +13824,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "ddedf7de-b828-59ea-ae23-824d73925148")
-		(property "Reference" "C26"
-			(at 35.56 130.81 0)
+		(uuid "c732ee41-5cc6-588e-82e3-76b9ac62cac5")
+		(property "Reference" "C27"
+			(at 93.98 166.37 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14097,7 +13837,7 @@
 			)
 		)
 		(property "Value" "4u7"
-			(at 35.56 133.35 0)
+			(at 93.98 168.91 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14108,7 +13848,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14120,7 +13860,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14131,8 +13871,8 @@
 				(justify left)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
-			(at 33.02 132.08 0)
+		(property "Description" "decoupling: U6 pin 1 VIN"
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14144,7 +13884,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14156,7 +13896,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14168,7 +13908,7 @@
 			)
 		)
 		(property "MPN" "CL10A475KO8NNNC"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14180,7 +13920,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14192,7 +13932,7 @@
 			)
 		)
 		(property "LCSC" "C19666"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14204,7 +13944,7 @@
 			)
 		)
 		(property "Dielectric" "X5R"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14216,7 +13956,7 @@
 			)
 		)
 		(property "Tolerance" "10%"
-			(at 33.02 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14228,187 +13968,7 @@
 			)
 		)
 		(property "Voltage" "16V"
-			(at 33.02 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "e98a7225-e3a6-5668-a3fd-2ce6a426d890")
-		)
-		(pin "2"
-			(uuid "91e0b71e-375c-5aab-93c0-f06517c4fd60")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "C26")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 60.96 132.08 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "c732ee41-5cc6-588e-82e3-76b9ac62cac5")
-		(property "Reference" "C27"
-			(at 63.5 130.81 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "1u"
-			(at 63.5 133.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_keywords" "cap capacitor"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_fp_filters" "C_*"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "MPN" "CL05A105KA5NQNC"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Manufacturer" "Samsung"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "LCSC" "C52923"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Dielectric" "X5R"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Tolerance" "10%"
-			(at 60.96 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Voltage" "25V"
-			(at 60.96 132.08 0)
+			(at 91.44 167.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)

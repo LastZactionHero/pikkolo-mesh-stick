@@ -259,14 +259,18 @@ s.net("GND", "#PWR_GND1.1")
 
 # --- VBUS -> ferrite -> the two 3V3 rails ---------------------------------
 # Total VBUS-to-GND capacitance is capped at 10uF by BOTH USB 2.0 (inrush, section
-# 7.2.4.1) and Type-C (Table 4-3). Budget, in uF:
-#   C26 4.7 (bulk) + C27 1 (U6 VIN) + C15 1 (U5 VIN) + C41 0.1 (U7) = 6.8uF.
+# 7.2.4.1) and Type-C (Table 4-3). Budget, in uF: C15 4.7 + C27 4.7 + C41 0.1 = 9.5uF.
+#
+# One 4u7 per LDO input rather than a separate bulk cap. TI specify CIN >= 0.7uF "over
+# the full range of operating conditions" for the LP5907, and a 1uF 0402 sitting at 5-5.5V
+# of DC bias can derate to 0.3-0.5uF -- under the floor. A 16V 0603 4u7 holds ~2.8uF at
+# 5V, and putting one at each regulator also satisfies TI's "not more than 1 cm from the
+# input pin", which a shared bulk cap at the connector would not.
+#
 # There is deliberately no ferrite between the plug and the LDOs. One was fitted in Rev A
 # when 44uF sat behind it; with the bulk cut to spec the bead's 0.6-1.6uH against 2uF
 # became a 90-145kHz tank damped only by its own DCR, and a hot-plug step would ring
 # 13-49% above 5V -- past the LP5907's 6.0V absolute maximum.  [usbc]
-decouple("C26", 33.02, 132.08, "4u7", "VBUS", fp=FP["C0603"])
-decouple("C27", 60.96, 132.08, "1u", "VBUS")
 
 s.place("U5", "Regulator_Linear:ME6211C33M5", 111.76, 116.84, value="ME6211C33M5G",
         footprint=FP["SOT23_5"],
@@ -275,7 +279,7 @@ s.net("VBUS", "U5.1", "U5.3")            # CE tied to VIN: always on
 s.net("GND", "U5.2")
 s.net("+3V3", "U5.5")
 s.no_connect("U5.4")
-decouple("C15", 91.44, 132.08, "1u", "VBUS")   # U5 local VIN
+decouple("C15", 91.44, 132.08, "4u7", "VBUS", fp=FP["C0603"], at="U5 pin 1 VIN")
 decouple("C16", 137.16, 132.08, "1u", "+3V3")
 decouple("C18", 157.48, 132.08, "4u7", "+3V3", fp=FP["C0603"])
 rail("#PWR_3V3A", "power:+3V3", 177.8, 116.84)
@@ -295,7 +299,7 @@ s.net("+3V3_RF", "U6.5")
 s.no_connect("U6.4")
 decouple("C17", 137.16, 167.64, "1u", "+3V3_RF")
 decouple("C19", 157.48, 167.64, "4u7", "+3V3_RF", fp=FP["C0603"])
-decouple("C14", 91.44, 167.64, "100n", "+3V3_RF")
+decouple("C27", 91.44, 167.64, "4u7", "VBUS", fp=FP["C0603"], at="U6 pin 1 VIN")
 rail("#PWR_RFA", "zach:+3V3_RF", 177.8, 152.4)
 s.net("+3V3_RF", "#PWR_RFA.1")
 

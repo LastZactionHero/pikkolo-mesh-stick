@@ -3,16 +3,18 @@
 Status 2026-08-23. Schematic captured and verified; layout not started.
 
 ```
-verify_netlist.py   60 intended / 60 exported / 0 discrepancies
+verify_netlist.py   59 intended / 59 exported / 0 discrepancies
 kicad-cli sch erc   0 errors, 1 warning (explained below)
-check_design.py     81 parts, 60 nets, 0 FAIL
-ready_to_route.py   4 of 6 mechanical gates PASS
+check_design.py     75 parts, 59 nets, 0 FAIL
+bom.py              35 line items, 64 fitted placements, 2 DNP
+ready_to_route.py   5 of 6 mechanical gates PASS
 ```
 
 **Run `python3 mesh/ready_to_route.py` before doing anything else.** It is the gate: it
-prints what is mechanically true, and it names the things a script cannot close. Two
-gates are failing right now — the BOM is not sourced, and six design decisions are still
-open — and both are listed further down.
+prints what is mechanically true, and it names the things a script cannot close. Every
+design decision is now closed. One gate is still failing: three commodity resistor values
+(470R, 4k7, 0R) have no distributor part number, and guessing one is worse than leaving
+the gap visible.
 
 ---
 
@@ -174,19 +176,47 @@ the gate.
 
 ---
 
-## Open decisions — the gate fails until these are closed
+## The decisions, and why
 
-`mesh_design.py` carries them in `STACKUP` and `DECISIONS` as `None`, so they cannot be
-forgotten into a fab order.
+`mesh_design.py` carries these in `STACKUP` and `DECISIONS`. The gate fails on any `None`,
+so an open question cannot be forgotten into a fab order. All are now closed.
 
-| Decision | The question |
-|---|---|
-| `stackup.layers` | 2 or 4. One review computed that 2-layer shunt-cap ground vias (1.71 nH at 0.8 mm through-board) put each RF shunt cap's series resonance around 1.7–2.1 GHz — below 3f₀/4f₀/5f₀, which is where the filter has to work. Semtech themselves used 4 layers for the +22 dBm SX1262 and 2 only for the +14 dBm SX1261. |
-| `rf_network` | Discrete or the Johanson `0900FM15D0039001E` IPD. The discrete TX arm is reportedly Semtech's **SX1261** topology being run at +22 dBm — two elements short. The IPD replaces ~10 discretes, covers the differential RX balun, and is vendor-qualified at +22 dBm, which would close the tuning question outright. Blocked on its land pattern. |
-| `antenna` | SMA edge-launch (needs a part suited to 0.8 mm, not the 1.6 mm-slotted stock footprint J1 still points at) or a chip antenna (Johanson 0915AT43A0026 is −4 dBi average and needs a 9.5 × 20 mm all-layer keepout). This sets the board outline. |
-| `flash_mpn` | The stock RP2040 boot2 sets the quad-enable bit with a two-byte 01h WRSR that not every flash executes. Either confirm the GD25Q32E accepts it, name the `boot2_generic_03h` override, or move to a part that is known good. |
-| `rails` | One LDO or two. Waveshare runs RP2040 and SX1262 from one 3V3 rail; deleting U6 + C17 saves 2 parts. Needs the phase-noise cost quantified, not assumed. |
-| `ferrite_fb1` | Keep or delete. Needs its LC resonance against C27 + C15 computed before it is defended. |
+| Decision | Made | Why |
+|---|---|---|
+| `stackup.layers` | **4**, `JLC04081H-3313` | Not for via inductance — that argument was recomputed and does not survive at 0.8 mm, where the resonances land at 2.2–3.9 GHz and help. It buys an uninterrupted ground plane 0.0994 mm under every RF element and a 50 Ω line 0.15 mm wide instead of 1.34 mm. Fee-free; ≤ $0.15/board at qty 100. |
+| `rf_network` | **`johanson-ipd`**, `0900FM15K0039001E` | Replaces 13 discretes with one factory-trimmed LTCC part, and fixes the underlying defect: the discrete TX arm was Semtech's **SX1261** topology being run at +22 dBm. The **K** variant, not the D — see the FCC section. KiCad already ships the symbol and footprint. |
+| `antenna` | **u.FL** + SMA(F) bulkhead pigtail | Two board-edge connectors cannot share one thickness window: the plug needs 0.72–0.88 mm and the only orderable 0.8 mm end-launch SMA caps at 0.79 mm, while the fab delivers 0.72–0.88 mm. u.FL is surface-mount, thickness-agnostic, $0.23 against $3.40, machine-placeable, and moves the strain path off a 0.8 mm board edge into the enclosure. |
+| `flash_mpn` | **W25Q128JVSIQ** | The GD25Q32E accepts only a **one-byte** 01h status-register write; RP2040's stock boot2 issues a two-byte form, so the quad-enable bit never gets set and the chip faults out of boot — after enumerating and accepting a UF2. The Winbond `…IQ` order codes ship QE fixed at 1, so boot2 short-circuits and never issues the write. Also a JLCPCB Basic part. |
+| `rails` | **two LDOs** | Not a preference — a number. Merged onto one ME6211 the worst-case corner is 432 mW against that package's 300 mW **absolute maximum**. Splitting 72 mA / 121 mA keeps both inside SOA. |
+| `ferrite_fb1` | **deleted** | With the VBUS bulk cut to spec it was left driving 2 µF: a 90–145 kHz tank damped only by its own DCR, ringing 13–49 % above 5 V on hot-plug — past the LP5907's 6.0 V absolute maximum. |
+
+## Manufacturing constraints, established before layout
+
+- **Order stack-up `JLC04081H-3313` by name, never "no requirement".** The fab's thickness
+  tolerance (±0.1 mm) is wider than the connector's window (0.72–0.88 mm) and nothing
+  closes that; all you control is where the nominal sits. `-3313` builds at 0.7992 mm,
+  dead centre. Explicitly exclude `JLC04081H-7628A` — it builds at 0.7212 mm, below the
+  connector's floor before tolerance is applied.
+- **Specify a 0.12 mm stencil.** The RP2040's 0.20 × 0.875 mm lead apertures have an IPC
+  area ratio of 0.68 at 0.12 mm and only 0.54 at 0.15 mm, against a 0.66 floor.
+- **The board must be panelised.** 20 × 75 mm is under JLCPCB Standard PCBA's 70 × 70 mm
+  single-board minimum, and Economic PCBA is disqualified twice over — single-sided
+  placement only (J2's B row is on B.Cu) and no ENIG at 0.8 mm. A 3-up panel at roughly
+  74 × 85 mm clears it.
+- **Fiducials are missing** — none global, none local at the 0.4 mm-pitch QFN-56. Add them
+  in layout.
+- **J2 forces double-sided paste** and a protection cap during reflow, on a board that is
+  otherwise single-sided. Hand-fit it after the SMT run and mark it Do Not Place in the
+  JLCPCB BOM.
+- **The 0.5 mm copper-to-edge rule cannot hold at J2** — its own shell pads sit 0.275 mm
+  from the footprint edge. Scope that rule so it excludes the connector, rather than
+  discovering it as 20 DRC errors.
+- **The RP2040 leaves a 0.20 mm solder-mask dam**, which is exactly JLCPCB's limit. Expect
+  ganged openings if anything shifts.
+- **Exposed-pad vias are unfilled by design.** JLCPCB's plugged-via rules exclude a via
+  with a mask opening on either side, and the exposed pad's own opening is one. Wicking is
+  controlled at the stencil instead: paste coverage is 56.3 % (RP2040) and 52.3 % (SX1262),
+  inside IPC-7093A's 50–60 % band, and every aperture clears its via barrel.
 
 ## FCC, for whoever does the pre-scan
 
@@ -201,6 +231,24 @@ The parts that carry compliance are the LPF section and the antenna pi (C32/C33/
 **The antenna pi is not a BOM-reduction candidate**: the PE4259 sits between the TX filter
 and the antenna and generates its own harmonics, so the pi is the only filtering after the
 switch.
+
+## The firmware contract
+
+A forked variant is mandatory — stock `rp2040-lora` will not bring this board up.
+
+| Define | Value | Why |
+|---|---|---|
+| `SX126X_DIO3_TCXO_VOLTAGE` | **3.0** | Commented out upstream, so DIO3 never powers the TCXO and the radio never starts. **3.0, not 1.8** — Y2 is the MCGNNM ordering code (2.66–3.465 V). The 1.8 V sibling is a trap: RadioLib defaults `tcxoVoltage` to 1.6 V, below that part's 1.7 V minimum. |
+| `-D HW_SPI1_DEVICE` | required | Load-bearing: omitting it is a boot-time `panic()`, and SPI0's default pins collide with LORA_DIO1 / RF_SW_NCTRL / LORA_BUSY. |
+| `BUTTON_PIN` | 6 | Upstream is −1, and the code tests `#ifdef` not the value, so the button silently does nothing. |
+| `LED_POWER` / `LED_LORA` | 2 / 3 | The two plain LEDs. No custom driver needed. |
+| `HAS_CPU_SHUTDOWN` | **omit** | A 3.9 s hold on SW1 triggers SHUTDOWN. On a USB-only stick with no wake source that is a node that stops until it is physically unplugged. |
+| `board_upload.maximum_size` | 4194304+ | `board = rpipico` declares 2 MiB. |
+| `SX126X_MAX_POWER` | see note | Defaults to 22, so first-article firmware commands +22 dBm immediately. Hold it lower until the front end has been measured. |
+| `BATTERY_PIN` | **never define** | No battery, no divider, GP26 is a no-connect. Uncommenting it makes `Power.cpp` read a floating pin and act on the result. |
+
+Also: SPI0's default pins must be overridden (`PIN_SPI0_SCK 2`, `PIN_SPI0_MOSI 3`) or the
+global `SPI` object must never be touched.
 
 ## Layout constraints that live in the schematic
 
