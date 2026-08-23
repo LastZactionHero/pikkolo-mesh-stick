@@ -35,20 +35,33 @@ DATE = "2026-08-23"
 # the gate on any None -- so an open question cannot be forgotten into a fab order. Each
 # entry records the reason, because a bare number invites someone to "improve" it later.
 STACKUP = dict(
-    layers=None,          # 2 or 4 -- gated on the RF shunt-cap via-inductance question
+    layers=4,
+    stackup_code="JLC04081H-3313",
     thickness_mm=0.8,     # set BY THE CONNECTOR: the JAE DX07P024AJ1 straddle plug
                           # specifies 0.8 +/-0.08 mm pad-to-pad, and the board edge is the
                           # plug's tongue. Not a free choice.
-    copper_oz=1,
+    l1_l2_mm=0.0994,      # 3313 prepreg, Er 4.1. The number the RF geometry hangs on:
+                          # 50 ohm comes out 0.15 mm masked, narrower than the pads it
+                          # lands on, instead of 1.34 mm on a 2-layer 0.8 mm board.
+    copper_oz=1,          # 1 oz outer, 0.5 oz inner
     finish="ENIG",        # 0.8 mm board, 0.4 mm pitch QFN, and an RF front end
 )
+# Order JLC04081H-3313 BY NAME, never "no requirement". JLCPCB's finished-thickness
+# tolerance (+/-0.1 mm) is wider than the connector's window (0.72-0.88 mm) and nothing
+# closes that; all you can control is where the nominal sits. -3313 builds at 0.7992 mm,
+# dead centre. Explicitly exclude JLC04081H-7628A, which builds at 0.7212 mm - below the
+# connector's floor before tolerance is even applied.
 
 DECISIONS = dict(
-    rf_network=None,      # "discrete" or "johanson-ipd"
+    rf_network="johanson-ipd",   # 0900FM15K0039001E -- see block D
     antenna=None,         # "sma-edge" or a chip-antenna MPN
     flash_mpn=None,       # must boot with the stock RP2040 boot2, or name the override
-    rails=None,           # "one-ldo" or "two-ldo"
-    ferrite_fb1=None,     # True to keep, False to delete
+    rails="two-ldo",      # U6 carries the whole radio: 120 mA at +22 dBm. Worst case
+                          # (5.5-3.3)*0.120 = 0.264 W into a SOT-23-5 at RthJA 193.4 C/W
+                          # = 51 C rise. Acceptable, and a shared rail would put RP2040
+                          # USB and QSPI switching noise onto VBAT with no headroom -- the
+                          # SX1262 needs >=3.30 V at its pins to reach +22 dBm.
+    ferrite_fb1=False,    # deleted: see the VBUS budget comment
 )
 
 FP = dict(
@@ -64,6 +77,7 @@ FP = dict(
     SW="Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A",
     USBC="Connector_USB:USB_C_Plug_JAE_DX07P024AJ1",
     SMA="Connector_Coaxial:SMA_Amphenol_132289_EdgeMount",
+    IPD="RF_Converter:Balun_Johanson_0900FM15K0039",
     TP="TestPoint:TestPoint_Pad_D1.0mm",
     R="Resistor_SMD:R_0402_1005Metric",
     C="Capacitor_SMD:C_0402_1005Metric",
@@ -154,8 +168,9 @@ s.text(15.24, 22.86, "A  USB-C plug entry, ESD, power rails")
 # the Debug-Accessory signature instead of a device.  [usbc]
 # This is a straddle-mount plug: the A row lands on F.Cu, the B row on B.Cu, and the
 # board edge itself becomes the plug's tongue. So the CONNECTOR sets the stack-up --
-# JAE's drawing calls for 0.8 +/-0.08 mm pad to pad. That is also what makes a 90 ohm
-# USB pair and a sane 50 ohm RF line routable on two layers.  [usbc]
+# JAE's drawing calls for 0.8 +/-0.08 mm pad to pad. (Do not cite the USB pair as evidence
+# for a stack-up: RP2040's USB is full-speed 12 Mbit/s and the run is under 25 mm, so it
+# never behaves as a transmission line on any of these builds.)  [usbc]
 s.place("J2", "Connector:USB_C_Plug_USB2.0", 38.1, 71.12, value="USB-C plug",
         footprint=FP["USBC"])
 s.net("VBUS", "J2.A4")                     # A4/A9/B4/B9 are one stacked pin
@@ -200,26 +215,23 @@ rail("#PWR_GND1", "power:GND", 17.78, 71.12)
 s.net("GND", "#PWR_GND1.1")
 
 # --- VBUS -> ferrite -> the two 3V3 rails ---------------------------------
-s.place("FB1", "Device:FerriteBead", 45.72, 116.84, value="600R@100MHz",
-        footprint=FP["FB"], angle=90)
-s.net("VBUS", "FB1.1")
-s.net("VBUS_F", "FB1.2")
-flag("#FLG_VBUSF", 22.86, 116.84)
-s.net("VBUS_F", "#FLG_VBUSF.1")
 # Total VBUS-to-GND capacitance is capped at 10uF by BOTH USB 2.0 (inrush, section
-# 7.2.4.1) and Type-C (Table 4-3). The ferrite does not buy an exemption: at ~0.3 ohm DCR
-# everything behind it is visible on the inrush timescale. Budget, in uF:
-#   C26 4.7 + C27 1 + C15 1 + C41 0.1 + C38 0.1 + C39 2.2 = 9.1uF.  [usbc]
+# 7.2.4.1) and Type-C (Table 4-3). Budget, in uF:
+#   C26 4.7 (bulk) + C27 1 (U6 VIN) + C15 1 (U5 VIN) + C41 0.1 (U7) = 6.8uF.
+# There is deliberately no ferrite between the plug and the LDOs. One was fitted in Rev A
+# when 44uF sat behind it; with the bulk cut to spec the bead's 0.6-1.6uH against 2uF
+# became a 90-145kHz tank damped only by its own DCR, and a hot-plug step would ring
+# 13-49% above 5V -- past the LP5907's 6.0V absolute maximum.  [usbc]
 decouple("C26", 33.02, 132.08, "4u7", "VBUS", fp=FP["C0603"])
-decouple("C27", 60.96, 132.08, "1u", "VBUS_F")
+decouple("C27", 60.96, 132.08, "1u", "VBUS")
 
 s.place("U5", "Regulator_Linear:ME6211C33M5", 111.76, 116.84, value="ME6211C33M5G",
         footprint=FP["SOT23_5"])
-s.net("VBUS_F", "U5.1", "U5.3")            # CE tied to VIN: always on
+s.net("VBUS", "U5.1", "U5.3")            # CE tied to VIN: always on
 s.net("GND", "U5.2")
 s.net("+3V3", "U5.5")
 s.no_connect("U5.4")
-decouple("C15", 91.44, 132.08, "1u", "VBUS_F")
+decouple("C15", 91.44, 132.08, "1u", "VBUS")   # U5 local VIN
 decouple("C16", 137.16, 132.08, "1u", "+3V3")
 decouple("C18", 157.48, 132.08, "10u", "+3V3", fp=FP["C0603"])
 rail("#PWR_3V3A", "power:+3V3", 177.8, 116.84)
@@ -227,7 +239,7 @@ s.net("+3V3", "#PWR_3V3A.1")
 
 s.place("U6", "Regulator_Linear:LP5907MFX-3.3", 111.76, 152.4, value="LP5907MFX-3.3",
         footprint=FP["SOT23_5"])
-s.net("VBUS_F", "U6.1", "U6.3")
+s.net("VBUS", "U6.1", "U6.3")
 s.net("GND", "U6.2")
 s.net("+3V3_RF", "U6.5")
 s.no_connect("U6.4")
@@ -259,7 +271,7 @@ s.net("RUN", "U1.26")
 # cap belongs to is recorded in its Description rather than being visible in the ratsnest.
 for ref, x, pin in [("C3", 218.44, "IOVDD pin 1"), ("C4", 233.68, "IOVDD pin 10"),
                     ("C5", 248.92, "IOVDD pin 22"), ("C6", 264.16, "IOVDD pin 33"),
-                    ("C8", 279.4, "IOVDD pin 42"), ("C9", 294.64, "IOVDD pins 48+49"),
+                    ("C8", 279.4, "IOVDD pin 42"), ("C9", 294.64, "IOVDD pin 49 + USB_VDD pin 48 shared, per RPi HD 2.1.2"),
                     ("C44", 309.88, "ADC_AVDD pin 43")]:
     decouple(ref, x, 40.64, "100n", "+3V3", at=pin)
 # The core LDO needs 1uF at BOTH ends: VREG_VIN also feeds the power-on-reset and
@@ -325,6 +337,11 @@ s.place("TP6", "Connector:TestPoint", 307.34, 246.38, value="SDA", footprint=FP[
 s.place("TP7", "Connector:TestPoint", 327.66, 246.38, value="SCL", footprint=FP["TP"])
 s.net("I2C_SDA", "U1.6", "TP6.1")                  # GPIO4 = Wire0 SDA
 s.net("I2C_SCL", "U1.7", "TP7.1")                  # GPIO5 = Wire0 SCL
+res("R12", 307.34, 220.98, "4k7")                  # I2C is open drain: the bus cannot be
+res("R13", 327.66, 220.98, "4k7")                  # released high without these
+s.net("+3V3", "R12.1", "R13.1")
+s.net("I2C_SDA", "R12.2")
+s.net("I2C_SCL", "R13.2")
 s.net("SWCLK", "U1.24", "TP1.1")
 s.net("SWDIO", "U1.25", "TP2.1")
 s.net("GND", "TP3.1")
@@ -372,7 +389,7 @@ s.net("LORA_DIO1", "U2.13", "U1.27")               # GPIO16
 # real part does not have. The 2520 body is also where the cheap 32 MHz parts live.
 s.place("Y2", "Oscillator:TG2520SMN-xx.xxxxxxMhz-xxxxNM", 439.42, 137.16,
         value="32MHz TCXO 1.8V clipped-sine", footprint=FP["TCXO"],
-        props={"MPN": "TG2520SMN 32.0000M", "Manufacturer": "Seiko Epson",
+        props={"MPN": "TG2520SMN 32.0000M-ECGNNM", "Manufacturer": "Seiko Epson",
                "LCSC": "C7527388",
                "Description": "32.000MHz TCXO, clipped sine 0.2-1.2Vpp, Vcc 1.7-3.6V, "
                               "ICC <=3mA, start-up <=5ms (RadioLib gates at 5ms), "
@@ -393,30 +410,44 @@ s.net("VDD_TCXO", "#FLG_TCXO.1")
 # ====================================================== D. RF front end (915MHz)
 s.box(12.7, 302.26, 447.04, 101.6)
 s.text(15.24, 309.88,
-       "D  TX LPF / RX balun / antenna pi / SPDT     values [ws] 902-928MHz - tune on hardware")
+       "D  Johanson IPD front end + SPDT antenna switch    902-928MHz")
 
+# The discrete matching network is gone. What was here was Semtech's SX1261 topology being
+# run at +22 dBm - two elements short of their SX1262 network - with values taken from a
+# licensee's schematic and never validated. FL1 replaces the TX filter AND the RX balun
+# with one LTCC part whose response is fixed in ceramic and factory-tested.
+#
+# The K variant, not the D. 2f0 (1804-1856 MHz) is NOT in an FCC restricted band and needs
+# only 20 dBc, but 3f0 (2706-2784), 4f0 (3608-3712) and 5f0 (4510-4640) all are and need
+# ~63 dB. The D part specifies nothing above 3f0; the K specifies all three.
+#
+# DigiKey only - Johanson is not in LCSC's catalogue - so this part is consigned or hand
+# placed if the board goes to JLCPCB assembly.
 RFFP = dict(R=FP["R"], C=FP["C"], L=FP["L"])
-TXY, RXY = 342.9, 383.54
+TXY = 342.9
 
-# --- TX arm: RFO -> 2nd-harmonic notch -> pi LPF -> switch RF1 --------------
-tx = Chain(s, 40.64, TXY, RFFP)
-tx.series("L1", "L", "47n", "VR_PA", "RFO")        # PA drain choke  [semtech]
-tx.series("L2", "L", "2n5", "RFO", "TX1")
-tx.series("C22", "C", "39p", "TX1", "TX2")         # DC block into the switch
-tx.series("L3", "L", "4n7", "TX2", "RF_TX")
-tx.parallel("C20", "C", "3p", "RFO", "TX1")        # notch at the 2nd harmonic
-tx.shunt("C21", "C", "5p6", "TX1")
-tx.shunt("C23", "C", "1p8", "RF_TX")
-s.net("RFO", "U2.23")
+ind("L1", 40.64, TXY, "47n", angle=90)             # PA drain choke, VR_PA -> RFO
+s.net("VR_PA", "L1.1")
+s.net("RFO", "L1.2", "U2.23")
 
-# --- RX arm: switch RF2 -> lumped balun -> differential LNA -----------------
-rx = Chain(s, 116.84, RXY, RFFP, mirror=True)
-rx.series("C25", "C", "2p4", "RF_RX", "RFI_N")
-rx.series("L4", "L", "15n", "RFI_N", "RFI_P")
-rx.shunt("C24", "C", "1p", "RF_RX")
-rx.shunt("C31", "C", "1p8", "RFI_P")
-s.net("RFI_N", "U2.22")
-s.net("RFI_P", "U2.21")
+s.place("FL1", "Filter:0900FM15K0039", 88.9, TXY, value="0900FM15K0039001E",
+        footprint=FP["IPD"],
+        props={"MPN": "0900FM15K0039001E", "Manufacturer": "Johanson Technology",
+               "DigiKey": "712-0900FM15K0039001ETR-ND",
+               "Description": "SX1262 front-end IPD: TX filter + RX balun, 902-928MHz, "
+                              "IL 1.1dB TX / 1.4dB RX max, 2W CW. NOT the D variant."})
+s.net("RFO", "FL1.1")
+s.net("RFI_N", "FL1.3", "U2.22")
+s.net("RFI_P", "FL1.4", "U2.21")
+s.net("GND", "FL1.2")                              # pins 2/5/7/9/10 stacked in the symbol
+
+# pSemi require the switch's RF ports be DC blocked. Johanson's reference puts no block
+# between the IPD and the switch, but they do not state that their switch ports are
+# DC-free, so these stay until that is answered. They reuse the existing 39p line item.
+series("C22", "C", 129.54, 330.2, "39p", "IPD_TX", "RF_TX", angle=90)
+series("C25", "C", 129.54, 373.38, "39p", "IPD_RX", "RF_RX", angle=90)
+s.net("IPD_TX", "FL1.8")
+s.net("IPD_RX", "FL1.6")
 
 # --- SPDT switch, complementary control  [variant] -------------------------
 s.place("U4", "zach:PE4259-63", 190.5, 358.14, value="PE4259-63", footprint=FP["SC70_6"])
@@ -424,27 +455,27 @@ s.net("RF_TX", "U4.1")                             # RF1 = TX  [semtech]
 s.net("RF_RX", "U4.3")                             # RF2 = RX
 s.net("RF_ANT", "U4.5")
 s.net("GND", "U4.2")
-series("R7", "R", 149.86, 337.82, "100R", "RF_SW_CTRL", "SW_CTRL", angle=90)
-series("R8", "R", 149.86, 388.62, "100R", "RF_SW_NCTRL", "SW_NCTRL", angle=90)
+series("R7", "R", 165.1, 325.12, "100R", "RF_SW_CTRL", "SW_CTRL", angle=90)
+series("R8", "R", 165.1, 388.62, "100R", "RF_SW_NCTRL", "SW_NCTRL", angle=90)
 s.net("SW_CTRL", "U4.4")
 s.net("SW_NCTRL", "U4.6")
-decouple("C35", 165.1, 325.12, "1n", "SW_CTRL")
-decouple("C36", 165.1, 396.24, "1n", "SW_NCTRL")
+decouple("C35", 218.44, 320.04, "1n", "SW_CTRL")
+decouple("C36", 218.44, 393.7, "1n", "SW_NCTRL")
 s.net("RF_SW_CTRL", "U2.12")                       # DIO2 drives CTRL
 s.net("RF_SW_NCTRL", "U1.28")                      # GPIO17 drives the complement
 
-# --- antenna pi, then the build-time IFA / SMA selection -------------------
-ant = Chain(s, 259.08, TXY, RFFP)
+# --- antenna feed ----------------------------------------------------------
+# The K variant already carries the harmonic filtering the discrete antenna pi provided,
+# so the pi is not fitted. Its lands stay as a tuning option: R15 is a 0R link in the
+# series position and C33/C34 are unpopulated. If the FCC pre-scan needs more suppression
+# at 3f0-5f0, fit 9n1 in place of R15 and populate the shunts.
+ant = Chain(s, 266.7, TXY, RFFP)
 ant.series("C32", "C", "39p", "RF_ANT", "ANT1")    # DC block off RFC
-ant.series("L5", "L", "9n1", "ANT1", "ANT2")
-ant.shunt("C33", "C", "3p9", "ANT1")
-ant.shunt("C34", "C", "3p9", "ANT2")
+ant.series("R15", "R", "0R", "ANT1", "ANT2")       # pi series position, linked out
+ant.shunt("C33", "C", "3p9", "ANT1", dnp=True)
+ant.shunt("C34", "C", "3p9", "ANT2", dnp=True)
 
-# Single antenna feed. A printed IFA at 915 MHz is 43 x 20 mm (TI DN023) and would eat
-# 57% of the board while still needing retuning against a ground plane half the size TI
-# characterised. The dual-feed 0R pair went with it: two stubs off ANT2 detune whichever
-# feed is actually fitted, and the two feeds want incompatible board-end treatments.
-s.place("J1", "Connector:Conn_Coaxial", 320.04, TXY, value="SMA edge", footprint=FP["SMA"])
+s.place("J1", "Connector:Conn_Coaxial", 327.66, TXY, value="SMA edge", footprint=FP["SMA"])
 s.net("ANT2", "J1.1")
 s.net("GND", "J1.2")
 
@@ -459,14 +490,14 @@ s.text(15.24, 185.42, "E  Status LEDs: heartbeat and radio activity")
 # This also deletes the board's only 4.5-5.5 V logic domain and its only part with under
 # 500 pieces of distributor stock.
 s.place("D1", "Device:LED", 63.5, 213.36, value="green", footprint=FP["LED"], angle=180)
-res("R9", 78.74, 213.36, "1k", angle=90)
+res("R9", 78.74, 213.36, "470R", angle=90)
 s.net("LED_PWR", "U1.4", "D1.2")                   # GPIO2 -> anode, LED_POWER heartbeat
 s.net("LED_PWR_K", "D1.1", "R9.1")                 # cathode -> 1k -> GND
 s.net("GND", "R9.2")
 s.quiet_pin("R9.1")
 
 s.place("D2", "Device:LED", 63.5, 241.3, value="red", footprint=FP["LED"], angle=180)
-res("R10", 78.74, 241.3, "1k", angle=90)
+res("R10", 78.74, 241.3, "470R", angle=90)
 s.net("LED_LORA", "U1.5", "D2.2")                  # GPIO3 -> anode, LED_LORA activity
 s.net("LED_LORA_K", "D2.1", "R10.1")               # cathode -> 1k -> GND
 s.net("GND", "R10.2")

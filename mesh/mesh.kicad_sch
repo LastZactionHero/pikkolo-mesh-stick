@@ -1359,171 +1359,6 @@
 			)
 			(embedded_fonts no)
 		)
-	(symbol "Device:FerriteBead"
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 0)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "FB"
-				(at -3.81 0.635 90)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "FerriteBead"
-				(at 3.81 0 90)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at -1.778 0 90)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Ferrite bead"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "L ferrite bead inductor filter"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "Inductor_* L_* *Ferrite*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "FerriteBead_0_1"
-				(polyline
-					(pts
-						(xy -2.7686 0.4064) (xy -1.7018 2.2606) (xy 2.7686 -0.3048) (xy 1.6764 -2.159) (xy -2.7686 0.4064)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 1.27) (xy 0 1.2954)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -1.27) (xy 0 -1.2192)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "FerriteBead_1_1"
-				(pin passive line
-					(at 0 3.81 270)
-					(length 2.54)
-					(name ""
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -3.81 90)
-					(length 2.54)
-					(name ""
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 	(symbol "Device:L"
 			(pin_numbers
 				(hide yes)
@@ -2038,6 +1873,288 @@
 								(size 1.27 1.27)
 							)
 						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	(symbol "Filter:0900FM15K0039"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "FL"
+				(at -6.35 -6.35 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "0900FM15K0039"
+				(at 0 6.35 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "RF_Converter:Balun_Johanson_0900FM15K0039"
+				(at 0 -9.525 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.johansontechnology.com/datasheets/0900FM15K0039/0900FM15K0039.pdf"
+				(at 0.635 -11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "868MHz/915MHz Sub-GHz Impedance Matched Filter integrated passive for Semtech SX1261, SX1262, LLCC68"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "Sub-GHz filter"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Balun*Johanson*0900FM15K0039*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "0900FM15K0039_0_0"
+				(pin passive line
+					(at -10.16 2.54 0)
+					(length 2.54)
+					(name "RFO"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -7.62 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 0 0)
+					(length 2.54)
+					(name "RFI_N"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 -2.54 0)
+					(length 2.54)
+					(name "RFI_P"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -7.62 90)
+					(length 2.54)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 10.16 0 180)
+					(length 2.54)
+					(name "SW_RFI"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -7.62 90)
+					(length 2.54)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "SW_RFO"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -7.62 90)
+					(length 2.54)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -7.62 90)
+					(length 2.54)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "0900FM15K0039_0_1"
+				(rectangle
+					(start -7.62 5.08)
+					(end 7.62 -5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
 					)
 				)
 			)
@@ -6199,7 +6316,7 @@
 		)
 		(uuid "51b1d1f4-7714-5c44-857e-414cd9dde5f7")
 	)
-	(text "D  TX LPF / RX balun / antenna pi / SPDT     values [ws] 902-928MHz - tune on hardware"
+	(text "D  Johanson IPD front end + SPDT antenna switch    902-928MHz"
 		(at 15.24 309.88 0)
 		(effects
 			(font
@@ -6208,7 +6325,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "f011e173-0f24-5b4a-86dd-5eeb10203363")
+		(uuid "849ce362-8df0-5ce4-9eba-ee33f71d9ec3")
 	)
 	(text "E  Status LEDs: heartbeat and radio activity"
 		(at 15.24 185.42 0)
@@ -6221,67 +6338,17 @@
 		)
 		(uuid "d9b8d6be-5959-5a09-9361-b9cce00441f5")
 	)
-	(wire
-		(pts
-			(xy 48.26 327.66) (xy 48.26 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3a331660-8570-57b0-b238-7e03a9fc0ca3")
-	)
-	(wire
-		(pts
-			(xy 63.5 327.66) (xy 63.5 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4ed82835-b14a-50e7-822e-b4d837079b86")
-	)
 	(junction
-		(at 48.26 342.9)
+		(at 274.32 342.9)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "557b79a3-9a99-5816-9488-fbfa27765624")
+		(uuid "6ca12ad7-c30b-5fbb-a942-8044c8471d67")
 	)
 	(junction
-		(at 63.5 342.9)
+		(at 289.56 342.9)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "60126f16-b684-53a0-87d1-95aa9a484f90")
-	)
-	(junction
-		(at 93.98 342.9)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "682e2426-69ed-57cc-80c8-7ae727aebd6b")
-	)
-	(junction
-		(at 93.98 383.54)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "2e1b6ffb-ef2c-500f-be80-e0ccf5256a80")
-	)
-	(junction
-		(at 124.46 383.54)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "25744341-b9fd-5c8e-95c7-7d1e5f30b633")
-	)
-	(junction
-		(at 266.7 342.9)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "f6137351-be7e-524d-8f68-de5b53f5699b")
-	)
-	(junction
-		(at 281.94 342.9)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "48cf9d3a-bb4b-5a77-9d60-d53758d4e7c9")
+		(uuid "b85ea272-1150-58f5-8933-42051c49cec2")
 	)
 	(wire
 		(pts
@@ -6765,66 +6832,6 @@
 	)
 	(wire
 		(pts
-			(xy 41.91 116.84) (xy 38.1 116.84)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "250da99b-045b-5646-a832-3ca6fb478dd7")
-	)
-	(label "VBUS"
-		(at 38.1 116.84 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "4035eed4-8aaa-5912-be67-87791e792ab4")
-	)
-	(wire
-		(pts
-			(xy 49.53 116.84) (xy 53.34 116.84)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c3d6d144-a35b-5295-9b80-0fb3c984c2ca")
-	)
-	(label "VBUS_F"
-		(at 53.34 116.84 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "f5777c4f-a61f-53c9-8750-01d417bdf8e1")
-	)
-	(wire
-		(pts
-			(xy 22.86 116.84) (xy 22.86 120.65)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "96f77937-c486-5156-a6df-4a9d706dd1f7")
-	)
-	(label "VBUS_F"
-		(at 22.86 120.65 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "2cfda89f-9bca-5062-9371-c8c5ce5788a6")
-	)
-	(wire
-		(pts
 			(xy 33.02 128.27) (xy 33.02 124.46)
 		)
 		(stroke
@@ -6873,7 +6880,7 @@
 		)
 		(uuid "975c38fc-abb2-51de-a870-00c94da17e07")
 	)
-	(label "VBUS_F"
+	(label "VBUS"
 		(at 60.96 124.46 90)
 		(effects
 			(font
@@ -6913,7 +6920,7 @@
 		)
 		(uuid "a47599e5-05be-5080-a5b9-85d21fe5c761")
 	)
-	(label "VBUS_F"
+	(label "VBUS"
 		(at 100.33 114.3 180)
 		(effects
 			(font
@@ -6933,7 +6940,7 @@
 		)
 		(uuid "2dd981f8-8c36-5177-9250-a63acc00d9ba")
 	)
-	(label "VBUS_F"
+	(label "VBUS"
 		(at 100.33 116.84 180)
 		(effects
 			(font
@@ -6993,7 +7000,7 @@
 		)
 		(uuid "cdc9e569-d495-57c7-a008-d2436d605109")
 	)
-	(label "VBUS_F"
+	(label "VBUS"
 		(at 91.44 124.46 90)
 		(effects
 			(font
@@ -7133,7 +7140,7 @@
 		)
 		(uuid "69c28025-7911-5c6f-bfbf-c67c7cec141b")
 	)
-	(label "VBUS_F"
+	(label "VBUS"
 		(at 100.33 149.86 180)
 		(effects
 			(font
@@ -7153,7 +7160,7 @@
 		)
 		(uuid "10f14a0c-679f-5908-b46a-53fe956275e4")
 	)
-	(label "VBUS_F"
+	(label "VBUS"
 		(at 100.33 152.4 180)
 		(effects
 			(font
@@ -8845,6 +8852,86 @@
 	)
 	(wire
 		(pts
+			(xy 307.34 217.17) (xy 307.34 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7961970a-0fe1-556b-81ca-25eaacb334ba")
+	)
+	(label "+3V3"
+		(at 307.34 213.36 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "dbe74600-529b-5481-893e-49c87b0143bf")
+	)
+	(wire
+		(pts
+			(xy 327.66 217.17) (xy 327.66 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2f811599-d30a-579e-ab79-525fafc1c771")
+	)
+	(label "+3V3"
+		(at 327.66 213.36 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "6373911c-2b47-51e9-b951-815c5f3d3a5b")
+	)
+	(wire
+		(pts
+			(xy 307.34 224.79) (xy 307.34 228.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dc0cb00d-49c9-5074-a49c-eda3e06b088a")
+	)
+	(label "I2C_SDA"
+		(at 307.34 228.6 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "76786326-4588-55f6-b122-21dccef5dfa3")
+	)
+	(wire
+		(pts
+			(xy 327.66 224.79) (xy 327.66 228.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cf2b81be-9b02-563d-94d9-9a155cf0a7c1")
+	)
+	(label "I2C_SCL"
+		(at 327.66 228.6 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "2aedeaba-7e90-5f0f-ba7c-54dd3f94e9da")
+	)
+	(wire
+		(pts
 			(xy 256.54 165.1) (xy 252.73 165.1)
 		)
 		(stroke
@@ -9815,176 +9902,6 @@
 	)
 	(wire
 		(pts
-			(xy 52.07 342.9) (xy 48.26 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "72b04cbc-be19-5ec1-bdd2-f196c49da0f8")
-	)
-	(wire
-		(pts
-			(xy 59.69 342.9) (xy 63.5 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a198bc40-e13d-5f85-982e-20814588fd73")
-	)
-	(label "TX1"
-		(at 63.5 342.9 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "6311f3c1-4b00-5b7d-aa8a-90b191a0d33b")
-	)
-	(wire
-		(pts
-			(xy 67.31 342.9) (xy 63.5 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4870957b-d2e9-5a17-a1bf-c5249e659a61")
-	)
-	(wire
-		(pts
-			(xy 74.93 342.9) (xy 78.74 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "356c2205-2637-5e9f-87d3-a98bd85a4a34")
-	)
-	(label "TX2"
-		(at 78.74 342.9 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "038c5462-10cd-5510-afda-039e56a8e489")
-	)
-	(wire
-		(pts
-			(xy 82.55 342.9) (xy 78.74 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "58736fc7-9cf7-5baf-abcd-ee916a5e63b5")
-	)
-	(wire
-		(pts
-			(xy 90.17 342.9) (xy 93.98 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1469bfe3-d5ed-5254-9f62-ba704cf4ddf4")
-	)
-	(label "RF_TX"
-		(at 93.98 342.9 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "79d6e94c-8369-5664-91e7-137299d2c172")
-	)
-	(wire
-		(pts
-			(xy 52.07 327.66) (xy 48.26 327.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "efd03e32-5456-5bd5-ba1d-e9f439953e85")
-	)
-	(wire
-		(pts
-			(xy 59.69 327.66) (xy 63.5 327.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1e6fcebe-4e42-5752-ae28-b025cf12a5bd")
-	)
-	(wire
-		(pts
-			(xy 63.5 346.71) (xy 63.5 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ed4656ab-9d55-503f-a173-b332e5007835")
-	)
-	(wire
-		(pts
-			(xy 63.5 354.33) (xy 63.5 358.14)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "017b088e-5fb8-57d8-9464-6f67ed32d430")
-	)
-	(label "GND"
-		(at 63.5 358.14 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "e5dcf00b-436c-574e-8160-758085beaa50")
-	)
-	(wire
-		(pts
-			(xy 93.98 346.71) (xy 93.98 342.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3f4e8ce2-7d44-527e-842e-621cbd2da05d")
-	)
-	(wire
-		(pts
-			(xy 93.98 354.33) (xy 93.98 358.14)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3d5b4246-0109-5252-bf33-385f0e8a3895")
-	)
-	(label "GND"
-		(at 93.98 358.14 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "40a986fa-ce4a-5556-8f21-453b2e75b0da")
-	)
-	(wire
-		(pts
 			(xy 505.46 106.68) (xy 509.27 106.68)
 		)
 		(stroke
@@ -10005,133 +9922,43 @@
 	)
 	(wire
 		(pts
-			(xy 120.65 383.54) (xy 124.46 383.54)
+			(xy 78.74 340.36) (xy 74.93 340.36)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "0910829e-a84c-5cde-ae76-24ab1d3ad96f")
+		(uuid "1230f516-bfa1-5c26-ab86-3a25754134ab")
 	)
-	(label "RF_RX"
-		(at 124.46 383.54 0)
+	(label "RFO"
+		(at 74.93 340.36 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "b20bf93e-ee2b-54ec-a39f-f6fa91d4dec5")
+		(uuid "5fb4fe36-fce6-5809-a630-55d2e93a807d")
 	)
 	(wire
 		(pts
-			(xy 113.03 383.54) (xy 109.22 383.54)
+			(xy 78.74 342.9) (xy 74.93 342.9)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "8b4b4e12-a94c-514e-ac84-c7225c3eadb0")
+		(uuid "0b71c8d6-d33d-503f-a6d5-f4ab32e73dcd")
 	)
 	(label "RFI_N"
-		(at 109.22 383.54 180)
+		(at 74.93 342.9 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "39d062ad-92e2-57f2-a7bd-04f16fdb086a")
-	)
-	(wire
-		(pts
-			(xy 105.41 383.54) (xy 109.22 383.54)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b2bd4b6f-784c-58a1-9365-598106195c23")
-	)
-	(wire
-		(pts
-			(xy 97.79 383.54) (xy 93.98 383.54)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "19bbb738-3b1b-56b9-8c0b-e1143f7948dd")
-	)
-	(label "RFI_P"
-		(at 93.98 383.54 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "564b295c-d8ba-5047-9bfa-ae232feeb698")
-	)
-	(wire
-		(pts
-			(xy 124.46 387.35) (xy 124.46 383.54)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a7683020-d1b1-5bb6-88ba-583d6d105d60")
-	)
-	(wire
-		(pts
-			(xy 124.46 394.97) (xy 124.46 398.78)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a3daf336-3850-504d-af36-295de801d95a")
-	)
-	(label "GND"
-		(at 124.46 398.78 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "95d671da-e952-5d3e-98bd-dda03ed9b9d6")
-	)
-	(wire
-		(pts
-			(xy 93.98 387.35) (xy 93.98 383.54)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "940de3d9-2861-505c-b0a9-a349d1a84ba0")
-	)
-	(wire
-		(pts
-			(xy 93.98 394.97) (xy 93.98 398.78)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0bb3c31d-86b1-5950-a2a7-e3dd0e239e6b")
-	)
-	(label "GND"
-		(at 93.98 398.78 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "6aae9ba0-ee36-5746-8f04-5fcff61ee7af")
+		(uuid "b3b4dd89-d47c-5135-815e-32d529780dd2")
 	)
 	(wire
 		(pts
@@ -10155,6 +9982,26 @@
 	)
 	(wire
 		(pts
+			(xy 78.74 345.44) (xy 74.93 345.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4966ae5e-867a-57e2-9331-bee80503d44e")
+	)
+	(label "RFI_P"
+		(at 74.93 345.44 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "9d68e858-278d-57a7-bdbb-5e29d7e746a6")
+	)
+	(wire
+		(pts
 			(xy 505.46 111.76) (xy 509.27 111.76)
 		)
 		(stroke
@@ -10172,6 +10019,146 @@
 			(justify left bottom)
 		)
 		(uuid "dc20fe8a-5e1d-5b4a-8f5c-2768d8340e7a")
+	)
+	(wire
+		(pts
+			(xy 88.9 350.52) (xy 88.9 354.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dab9fdaa-2cee-52a3-96c3-5c5e9ca81b52")
+	)
+	(label "GND"
+		(at 88.9 354.33 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "2a15593b-947c-50d8-977c-9df66a2b5111")
+	)
+	(wire
+		(pts
+			(xy 125.73 330.2) (xy 121.92 330.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4870957b-d2e9-5a17-a1bf-c5249e659a61")
+	)
+	(label "IPD_TX"
+		(at 121.92 330.2 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "88d8e915-29fc-5305-a2c0-6c346becef7b")
+	)
+	(wire
+		(pts
+			(xy 133.35 330.2) (xy 137.16 330.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "356c2205-2637-5e9f-87d3-a98bd85a4a34")
+	)
+	(label "RF_TX"
+		(at 137.16 330.2 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "038c5462-10cd-5510-afda-039e56a8e489")
+	)
+	(wire
+		(pts
+			(xy 125.73 373.38) (xy 121.92 373.38)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0910829e-a84c-5cde-ae76-24ab1d3ad96f")
+	)
+	(label "IPD_RX"
+		(at 121.92 373.38 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "b20bf93e-ee2b-54ec-a39f-f6fa91d4dec5")
+	)
+	(wire
+		(pts
+			(xy 133.35 373.38) (xy 137.16 373.38)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8b4b4e12-a94c-514e-ac84-c7225c3eadb0")
+	)
+	(label "RF_RX"
+		(at 137.16 373.38 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "39d062ad-92e2-57f2-a7bd-04f16fdb086a")
+	)
+	(wire
+		(pts
+			(xy 99.06 340.36) (xy 102.87 340.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d8075d13-f6ab-5dc4-b7bf-22a690329396")
+	)
+	(label "IPD_TX"
+		(at 102.87 340.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "2bff1499-db5e-535b-92e5-fe8fe9359394")
+	)
+	(wire
+		(pts
+			(xy 99.06 342.9) (xy 102.87 342.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b52a2179-de9d-5412-afda-2bb7bf9bf6b5")
+	)
+	(label "IPD_RX"
+		(at 102.87 342.9 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "05896f3a-a4c2-5156-b41e-958c1557549e")
 	)
 	(wire
 		(pts
@@ -10255,7 +10242,7 @@
 	)
 	(wire
 		(pts
-			(xy 146.05 337.82) (xy 142.24 337.82)
+			(xy 161.29 325.12) (xy 157.48 325.12)
 		)
 		(stroke
 			(width 0)
@@ -10264,7 +10251,7 @@
 		(uuid "b2903664-dc1a-541b-b8c5-4011ed358142")
 	)
 	(label "RF_SW_CTRL"
-		(at 142.24 337.82 180)
+		(at 157.48 325.12 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10275,7 +10262,7 @@
 	)
 	(wire
 		(pts
-			(xy 153.67 337.82) (xy 157.48 337.82)
+			(xy 168.91 325.12) (xy 172.72 325.12)
 		)
 		(stroke
 			(width 0)
@@ -10284,7 +10271,7 @@
 		(uuid "9a263eef-3a30-5566-9246-542d482bd044")
 	)
 	(label "SW_CTRL"
-		(at 157.48 337.82 0)
+		(at 172.72 325.12 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10295,7 +10282,7 @@
 	)
 	(wire
 		(pts
-			(xy 146.05 388.62) (xy 142.24 388.62)
+			(xy 161.29 388.62) (xy 157.48 388.62)
 		)
 		(stroke
 			(width 0)
@@ -10304,7 +10291,7 @@
 		(uuid "fcd6eb27-5fd3-59bb-889f-408effb1c3e3")
 	)
 	(label "RF_SW_NCTRL"
-		(at 142.24 388.62 180)
+		(at 157.48 388.62 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10315,7 +10302,7 @@
 	)
 	(wire
 		(pts
-			(xy 153.67 388.62) (xy 157.48 388.62)
+			(xy 168.91 388.62) (xy 172.72 388.62)
 		)
 		(stroke
 			(width 0)
@@ -10324,7 +10311,7 @@
 		(uuid "215d1e30-05fa-5ab3-9740-6dc17066bf0b")
 	)
 	(label "SW_NCTRL"
-		(at 157.48 388.62 0)
+		(at 172.72 388.62 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10375,7 +10362,7 @@
 	)
 	(wire
 		(pts
-			(xy 165.1 321.31) (xy 165.1 317.5)
+			(xy 218.44 316.23) (xy 218.44 312.42)
 		)
 		(stroke
 			(width 0)
@@ -10384,7 +10371,7 @@
 		(uuid "e91cee42-273b-51f2-9dd1-3fa144720d07")
 	)
 	(label "SW_CTRL"
-		(at 165.1 317.5 90)
+		(at 218.44 312.42 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10395,7 +10382,7 @@
 	)
 	(wire
 		(pts
-			(xy 165.1 328.93) (xy 165.1 332.74)
+			(xy 218.44 323.85) (xy 218.44 327.66)
 		)
 		(stroke
 			(width 0)
@@ -10404,7 +10391,7 @@
 		(uuid "aff5ff67-dc16-5e96-b7a1-4a5eadd261d6")
 	)
 	(label "GND"
-		(at 165.1 332.74 270)
+		(at 218.44 327.66 270)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10415,7 +10402,7 @@
 	)
 	(wire
 		(pts
-			(xy 165.1 392.43) (xy 165.1 388.62)
+			(xy 218.44 389.89) (xy 218.44 386.08)
 		)
 		(stroke
 			(width 0)
@@ -10424,7 +10411,7 @@
 		(uuid "d04ec1fa-2f77-5b2d-8f49-d3da5dac41a5")
 	)
 	(label "SW_NCTRL"
-		(at 165.1 388.62 90)
+		(at 218.44 386.08 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10435,7 +10422,7 @@
 	)
 	(wire
 		(pts
-			(xy 165.1 400.05) (xy 165.1 403.86)
+			(xy 218.44 397.51) (xy 218.44 401.32)
 		)
 		(stroke
 			(width 0)
@@ -10444,7 +10431,7 @@
 		(uuid "94f82993-27ed-506a-b0c1-63605efed860")
 	)
 	(label "GND"
-		(at 165.1 403.86 270)
+		(at 218.44 401.32 270)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10495,7 +10482,7 @@
 	)
 	(wire
 		(pts
-			(xy 255.27 342.9) (xy 251.46 342.9)
+			(xy 262.89 342.9) (xy 259.08 342.9)
 		)
 		(stroke
 			(width 0)
@@ -10504,7 +10491,7 @@
 		(uuid "21783744-b353-57f0-b860-0d029eb514c8")
 	)
 	(label "RF_ANT"
-		(at 251.46 342.9 180)
+		(at 259.08 342.9 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10515,7 +10502,7 @@
 	)
 	(wire
 		(pts
-			(xy 262.89 342.9) (xy 266.7 342.9)
+			(xy 270.51 342.9) (xy 274.32 342.9)
 		)
 		(stroke
 			(width 0)
@@ -10524,7 +10511,7 @@
 		(uuid "95c92231-7306-5673-84d0-38a7228e6568")
 	)
 	(label "ANT1"
-		(at 266.7 342.9 0)
+		(at 274.32 342.9 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10535,37 +10522,37 @@
 	)
 	(wire
 		(pts
-			(xy 270.51 342.9) (xy 266.7 342.9)
+			(xy 278.13 342.9) (xy 274.32 342.9)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "045952be-b380-5640-950e-934b9c1de071")
+		(uuid "d6c50f15-b74b-5909-9209-64ffcda537ca")
 	)
 	(wire
 		(pts
-			(xy 278.13 342.9) (xy 281.94 342.9)
+			(xy 285.75 342.9) (xy 289.56 342.9)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "21762112-e92c-5184-b654-15b4ff6118cd")
+		(uuid "94ff3a10-2da7-5265-9267-019028985da4")
 	)
 	(label "ANT2"
-		(at 281.94 342.9 0)
+		(at 289.56 342.9 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left bottom)
 		)
-		(uuid "ef5d1dc7-287f-5ad0-8273-239126cf5af0")
+		(uuid "8df843cd-2e91-5ccf-bc70-70dcf614b4e4")
 	)
 	(wire
 		(pts
-			(xy 266.7 346.71) (xy 266.7 342.9)
+			(xy 274.32 346.71) (xy 274.32 342.9)
 		)
 		(stroke
 			(width 0)
@@ -10575,7 +10562,7 @@
 	)
 	(wire
 		(pts
-			(xy 266.7 354.33) (xy 266.7 358.14)
+			(xy 274.32 354.33) (xy 274.32 358.14)
 		)
 		(stroke
 			(width 0)
@@ -10584,7 +10571,7 @@
 		(uuid "7a2f1886-523a-51cf-8327-9175f67cbb86")
 	)
 	(label "GND"
-		(at 266.7 358.14 270)
+		(at 274.32 358.14 270)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10595,7 +10582,7 @@
 	)
 	(wire
 		(pts
-			(xy 281.94 346.71) (xy 281.94 342.9)
+			(xy 289.56 346.71) (xy 289.56 342.9)
 		)
 		(stroke
 			(width 0)
@@ -10605,7 +10592,7 @@
 	)
 	(wire
 		(pts
-			(xy 281.94 354.33) (xy 281.94 358.14)
+			(xy 289.56 354.33) (xy 289.56 358.14)
 		)
 		(stroke
 			(width 0)
@@ -10614,7 +10601,7 @@
 		(uuid "910d41a9-5f66-5553-8edc-268813f30682")
 	)
 	(label "GND"
-		(at 281.94 358.14 270)
+		(at 289.56 358.14 270)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10625,7 +10612,7 @@
 	)
 	(wire
 		(pts
-			(xy 314.96 342.9) (xy 311.15 342.9)
+			(xy 322.58 342.9) (xy 318.77 342.9)
 		)
 		(stroke
 			(width 0)
@@ -10634,7 +10621,7 @@
 		(uuid "f0d6f3d6-fbc2-5e09-a0f0-98ebfcc41879")
 	)
 	(label "ANT2"
-		(at 311.15 342.9 180)
+		(at 318.77 342.9 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10645,7 +10632,7 @@
 	)
 	(wire
 		(pts
-			(xy 320.04 347.98) (xy 320.04 351.79)
+			(xy 327.66 347.98) (xy 327.66 351.79)
 		)
 		(stroke
 			(width 0)
@@ -10654,7 +10641,7 @@
 		(uuid "a0c3d321-de94-5a93-a186-4002203ebc51")
 	)
 	(label "GND"
-		(at 320.04 351.79 270)
+		(at 327.66 351.79 270)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11212,100 +11199,6 @@
 			(project "mesh"
 				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
 					(reference "#FLG_VBUS")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:PWR_FLAG")
-		(at 22.86 116.84 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "78e68468-07ef-544c-9a83-44764dd35737")
-		(property "Reference" "#FLG_VBUSF"
-			(at 22.86 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "PWR_FLAG"
-			(at 25.4 118.11 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 22.86 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 22.86 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" "Special symbol for telling ERC where power comes from"
-			(at 22.86 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_keywords" "flag power"
-			(at 22.86 116.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "ab3ece94-2d7b-5153-ad1f-43de9b242dd5")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "#FLG_VBUSF")
 					(unit 1)
 				)
 			)
@@ -12985,216 +12878,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 55.88 327.66 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "4e3b16d2-f3d9-5c0b-b3d4-0d727541b390")
-		(property "Reference" "C20"
-			(at 55.88 324.485 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "3p"
-			(at 55.88 330.835 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 55.88 327.66 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 55.88 327.66 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 55.88 327.66 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_keywords" "cap capacitor"
-			(at 55.88 327.66 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_fp_filters" "C_*"
-			(at 55.88 327.66 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "1887ea6b-2422-55aa-88c4-fe6183de2a66")
-		)
-		(pin "2"
-			(uuid "d83805a9-60ea-58f4-a7f2-cb792d0f33fc")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "C20")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 63.5 350.52 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "e5c15417-018b-5c72-bd60-c7fb246db012")
-		(property "Reference" "C21"
-			(at 66.04 349.25 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "5p6"
-			(at 66.04 351.79 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 63.5 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 63.5 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 63.5 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_keywords" "cap capacitor"
-			(at 63.5 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_fp_filters" "C_*"
-			(at 63.5 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "3f097bd5-5697-5797-9040-ed4f059939a2")
-		)
-		(pin "2"
-			(uuid "355917aa-631b-5090-82e8-baae772ddad5")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "C21")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 71.12 342.9 90)
+		(at 129.54 330.2 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13204,7 +12888,7 @@
 		(dnp no)
 		(uuid "076c15d3-85fc-5d4b-bdfc-7ebd4ece4268")
 		(property "Reference" "C22"
-			(at 71.12 339.725 270)
+			(at 129.54 327.025 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13214,7 +12898,7 @@
 			)
 		)
 		(property "Value" "39p"
-			(at 71.12 346.075 270)
+			(at 129.54 333.375 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13224,7 +12908,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 71.12 342.9 270)
+			(at 129.54 330.2 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13235,7 +12919,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 71.12 342.9 270)
+			(at 129.54 330.2 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13246,7 +12930,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 71.12 342.9 270)
+			(at 129.54 330.2 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13257,7 +12941,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 71.12 342.9 270)
+			(at 129.54 330.2 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13268,7 +12952,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 71.12 342.9 270)
+			(at 129.54 330.2 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13295,223 +12979,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 93.98 350.52 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "2ef8764a-e912-5110-b0cb-26401fc74ce6")
-		(property "Reference" "C23"
-			(at 96.52 349.25 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "1p8"
-			(at 96.52 351.79 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 93.98 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 93.98 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 93.98 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_keywords" "cap capacitor"
-			(at 93.98 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_fp_filters" "C_*"
-			(at 93.98 350.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "82c6dd06-c7cf-5f90-8e67-24b5db32abb6")
-		)
-		(pin "2"
-			(uuid "ef73e4e2-7104-52fb-9da3-3f55ef8b903e")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "C23")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 124.46 391.16 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "2ee80403-30af-54ce-9b95-776126ca3326")
-		(property "Reference" "C24"
-			(at 127 389.89 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "1p"
-			(at 127 392.43 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 124.46 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 124.46 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 124.46 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_keywords" "cap capacitor"
-			(at 124.46 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_fp_filters" "C_*"
-			(at 124.46 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "a761eac8-038e-5460-afc9-7953d6977a2f")
-		)
-		(pin "2"
-			(uuid "373869b8-7061-5ff5-a8c3-364ef18d9556")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "C24")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 116.84 383.54 270)
+		(at 129.54 373.38 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13521,7 +12989,7 @@
 		(dnp no)
 		(uuid "018b2041-3931-5a73-aa2e-f16c78882e19")
 		(property "Reference" "C25"
-			(at 116.84 380.365 90)
+			(at 129.54 370.205 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13530,8 +12998,8 @@
 				)
 			)
 		)
-		(property "Value" "2p4"
-			(at 116.84 386.715 90)
+		(property "Value" "39p"
+			(at 129.54 376.555 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13541,7 +13009,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 116.84 383.54 90)
+			(at 129.54 373.38 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13552,7 +13020,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 116.84 383.54 90)
+			(at 129.54 373.38 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13563,7 +13031,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 116.84 383.54 90)
+			(at 129.54 373.38 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13574,7 +13042,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 116.84 383.54 90)
+			(at 129.54 373.38 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13585,7 +13053,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 116.84 383.54 90)
+			(at 129.54 373.38 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14260,115 +13728,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 93.98 391.16 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "dd2ba65d-f367-5cea-a924-0c8819a4a68a")
-		(property "Reference" "C31"
-			(at 96.52 389.89 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "1p8"
-			(at 96.52 392.43 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 93.98 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 93.98 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 93.98 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_keywords" "cap capacitor"
-			(at 93.98 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "ki_fp_filters" "C_*"
-			(at 93.98 391.16 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "a8d19226-214d-5858-b24d-7dfdd0f42c08")
-		)
-		(pin "2"
-			(uuid "26d8ce3b-4db8-54dc-bf66-42d4b1eccbc2")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "C31")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 259.08 342.9 90)
+		(at 266.7 342.9 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -14378,7 +13738,7 @@
 		(dnp no)
 		(uuid "c754f1d5-fd2d-556e-bcc1-cb0ba044c096")
 		(property "Reference" "C32"
-			(at 259.08 339.725 270)
+			(at 266.7 339.725 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14388,7 +13748,7 @@
 			)
 		)
 		(property "Value" "39p"
-			(at 259.08 346.075 270)
+			(at 266.7 346.075 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14398,7 +13758,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 259.08 342.9 270)
+			(at 266.7 342.9 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14409,7 +13769,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 259.08 342.9 270)
+			(at 266.7 342.9 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14420,7 +13780,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 259.08 342.9 270)
+			(at 266.7 342.9 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14431,7 +13791,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 259.08 342.9 270)
+			(at 266.7 342.9 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14442,7 +13802,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 259.08 342.9 270)
+			(at 266.7 342.9 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14469,17 +13829,17 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 266.7 350.52 0)
+		(at 274.32 350.52 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "834d0e1e-2a56-5de8-958f-f3a1d5491db2")
 		(property "Reference" "C33"
-			(at 269.24 349.25 0)
+			(at 276.86 349.25 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14490,7 +13850,7 @@
 			)
 		)
 		(property "Value" "3p9"
-			(at 269.24 351.79 0)
+			(at 276.86 351.79 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14501,7 +13861,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 266.7 350.52 0)
+			(at 274.32 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14513,7 +13873,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 266.7 350.52 0)
+			(at 274.32 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14525,7 +13885,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 266.7 350.52 0)
+			(at 274.32 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14537,7 +13897,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 266.7 350.52 0)
+			(at 274.32 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14549,7 +13909,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 266.7 350.52 0)
+			(at 274.32 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14577,17 +13937,17 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 281.94 350.52 0)
+		(at 289.56 350.52 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "5df7caea-b71c-5873-b8a9-5693da310439")
 		(property "Reference" "C34"
-			(at 284.48 349.25 0)
+			(at 292.1 349.25 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14598,7 +13958,7 @@
 			)
 		)
 		(property "Value" "3p9"
-			(at 284.48 351.79 0)
+			(at 292.1 351.79 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14609,7 +13969,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 281.94 350.52 0)
+			(at 289.56 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14621,7 +13981,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 281.94 350.52 0)
+			(at 289.56 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14633,7 +13993,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 281.94 350.52 0)
+			(at 289.56 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14645,7 +14005,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 281.94 350.52 0)
+			(at 289.56 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14657,7 +14017,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 281.94 350.52 0)
+			(at 289.56 350.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14685,7 +14045,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 165.1 325.12 0)
+		(at 218.44 320.04 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -14695,7 +14055,7 @@
 		(dnp no)
 		(uuid "05f0fe3c-5646-518a-a383-806b7128f7d1")
 		(property "Reference" "C35"
-			(at 167.64 323.85 0)
+			(at 220.98 318.77 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14706,7 +14066,7 @@
 			)
 		)
 		(property "Value" "1n"
-			(at 167.64 326.39 0)
+			(at 220.98 321.31 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14717,7 +14077,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 165.1 325.12 0)
+			(at 218.44 320.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14729,7 +14089,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 165.1 325.12 0)
+			(at 218.44 320.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14741,7 +14101,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 165.1 325.12 0)
+			(at 218.44 320.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14753,7 +14113,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 165.1 325.12 0)
+			(at 218.44 320.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14765,7 +14125,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 165.1 325.12 0)
+			(at 218.44 320.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14793,7 +14153,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 165.1 396.24 0)
+		(at 218.44 393.7 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -14803,7 +14163,7 @@
 		(dnp no)
 		(uuid "ae3fa350-d859-5246-95c7-be31c496c4d1")
 		(property "Reference" "C36"
-			(at 167.64 394.97 0)
+			(at 220.98 392.43 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14814,7 +14174,7 @@
 			)
 		)
 		(property "Value" "1n"
-			(at 167.64 397.51 0)
+			(at 220.98 394.97 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14825,7 +14185,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 165.1 396.24 0)
+			(at 218.44 393.7 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14837,7 +14197,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 165.1 396.24 0)
+			(at 218.44 393.7 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14849,7 +14209,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 165.1 396.24 0)
+			(at 218.44 393.7 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14861,7 +14221,7 @@
 			)
 		)
 		(property "ki_keywords" "cap capacitor"
-			(at 165.1 396.24 0)
+			(at 218.44 393.7 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14873,7 +14233,7 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 165.1 396.24 0)
+			(at 218.44 393.7 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16137,7 +15497,7 @@
 				(justify left)
 			)
 		)
-		(property "Description" "decoupling: IOVDD pins 48+49"
+		(property "Description" "decoupling: IOVDD pin 49 + USB_VDD pin 48 shared, per RPi HD 2.1.2"
 			(at 294.64 40.64 0)
 			(hide yes)
 			(show_name no)
@@ -16413,8 +15773,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:FerriteBead")
-		(at 45.72 116.84 90)
+		(lib_id "Filter:0900FM15K0039")
+		(at 88.9 342.9 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -16422,29 +15782,31 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "98f83c2c-2103-5358-bc24-24791a430320")
-		(property "Reference" "FB1"
-			(at 45.72 113.665 270)
+		(uuid "e1e5cdfe-2264-5922-8662-bab05b684e79")
+		(property "Reference" "FL1"
+			(at 78.74 322.58 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "600R@100MHz"
-			(at 45.72 120.015 270)
+		(property "Value" "0900FM15K0039001E"
+			(at 78.74 325.12 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Footprint" "Inductor_SMD:L_0603_1608Metric"
-			(at 45.72 116.84 270)
+		(property "Footprint" "RF_Converter:Balun_Johanson_0900FM15K0039"
+			(at 88.9 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16452,10 +15814,11 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Datasheet" ""
-			(at 45.72 116.84 270)
+		(property "Datasheet" "https://www.johansontechnology.com/datasheets/0900FM15K0039/0900FM15K0039.pdf"
+			(at 88.9 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16463,10 +15826,11 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Description" "Ferrite bead"
-			(at 45.72 116.84 270)
+		(property "Description" "SX1262 front-end IPD: TX filter + RX balun, 902-928MHz, IL 1.1dB TX / 1.4dB RX max, 2W CW. NOT the D variant."
+			(at 88.9 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16474,10 +15838,11 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "ki_keywords" "L ferrite bead inductor filter"
-			(at 45.72 116.84 270)
+		(property "ki_keywords" "Sub-GHz filter"
+			(at 88.9 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16485,10 +15850,11 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "ki_fp_filters" "Inductor_* L_* *Ferrite*"
-			(at 45.72 116.84 270)
+		(property "ki_fp_filters" "Balun*Johanson*0900FM15K0039*"
+			(at 88.9 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16496,18 +15862,79 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
+			)
+		)
+		(property "MPN" "0900FM15K0039001E"
+			(at 88.9 342.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Manufacturer" "Johanson Technology"
+			(at 88.9 342.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "DigiKey" "712-0900FM15K0039001ETR-ND"
+			(at 88.9 342.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 		(pin "1"
-			(uuid "d2c1c1cf-9c49-568d-b7e3-a002ef2fd79c")
+			(uuid "de66e02c-cb1c-50ce-bd93-4b3af4ddfb65")
 		)
 		(pin "2"
-			(uuid "445c5802-48dd-5172-9893-a5bed1dc927c")
+			(uuid "be9c492e-ebef-51a9-9318-9a17a6c2a02c")
+		)
+		(pin "3"
+			(uuid "4085823e-799a-5fe8-8ec2-8c8ea48062b2")
+		)
+		(pin "4"
+			(uuid "e47eb573-b3a2-5187-8881-8cab3e6890ab")
+		)
+		(pin "5"
+			(uuid "540bd4ec-d898-5204-a15d-c684143b70bd")
+		)
+		(pin "6"
+			(uuid "6563cc00-9ec2-5672-880d-bd4c7ac72ad8")
+		)
+		(pin "7"
+			(uuid "5a963517-f76b-55f0-ae22-5d306569f167")
+		)
+		(pin "8"
+			(uuid "82816225-f80c-5915-ad4d-7de6e9948c09")
+		)
+		(pin "9"
+			(uuid "7840a14e-b104-5a83-86a1-ba268b9ec8ad")
+		)
+		(pin "10"
+			(uuid "ccd23fb6-6843-58c2-bafe-c1cc7cb8ba4a")
 		)
 		(instances
 			(project "mesh"
 				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "FB1")
+					(reference "FL1")
 					(unit 1)
 				)
 			)
@@ -16515,7 +15942,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_Coaxial")
-		(at 320.04 342.9 0)
+		(at 327.66 342.9 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -16525,7 +15952,7 @@
 		(dnp no)
 		(uuid "9352f755-ca29-549c-a862-2922221879fc")
 		(property "Reference" "J1"
-			(at 314.96 325.12 0)
+			(at 322.58 325.12 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -16536,7 +15963,7 @@
 			)
 		)
 		(property "Value" "SMA edge"
-			(at 314.96 327.66 0)
+			(at 322.58 327.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -16547,7 +15974,7 @@
 			)
 		)
 		(property "Footprint" "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount"
-			(at 320.04 342.9 0)
+			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16559,7 +15986,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 320.04 342.9 0)
+			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16571,7 +15998,7 @@
 			)
 		)
 		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
-			(at 320.04 342.9 0)
+			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16583,7 +16010,7 @@
 			)
 		)
 		(property "ki_keywords" "BNC SMA SMB SMC LEMO coaxial connector CINCH RCA MCX MMCX U.FL UMRF"
-			(at 320.04 342.9 0)
+			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16595,7 +16022,7 @@
 			)
 		)
 		(property "ki_fp_filters" "*BNC* *SMA* *SMB* *SMC* *Cinch* *LEMO* *UMRF* *MCX* *U.FL*"
-			(at 320.04 342.9 0)
+			(at 327.66 342.9 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16864,410 +16291,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:L")
-		(at 55.88 342.9 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "3f0c0a07-e743-5296-a1a1-f7db4287b505")
-		(property "Reference" "L2"
-			(at 55.88 339.725 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "2n5"
-			(at 55.88 346.075 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
-			(at 55.88 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 55.88 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Inductor"
-			(at 55.88 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_keywords" "inductor choke coil reactor magnetic"
-			(at 55.88 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_fp_filters" "Choke_* *Coil* Inductor_* L_*"
-			(at 55.88 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "1ea7b3e4-a256-5eef-b0df-ba7e81b276eb")
-		)
-		(pin "2"
-			(uuid "5c21c5bf-ec49-561f-94ec-50b64e14f459")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "L2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:L")
-		(at 86.36 342.9 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "3b9a1f13-7cdf-5438-b461-a9b8c20e62bb")
-		(property "Reference" "L3"
-			(at 86.36 339.725 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4n7"
-			(at 86.36 346.075 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
-			(at 86.36 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 86.36 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Inductor"
-			(at 86.36 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_keywords" "inductor choke coil reactor magnetic"
-			(at 86.36 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_fp_filters" "Choke_* *Coil* Inductor_* L_*"
-			(at 86.36 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "9d27b767-e526-5a98-90ad-813e0b1361ca")
-		)
-		(pin "2"
-			(uuid "adccfdaa-3807-5201-aa71-3b2ec4ebffba")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "L3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:L")
-		(at 101.6 383.54 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "5e9a1413-18b1-563b-aa79-f7b94ed88eb1")
-		(property "Reference" "L4"
-			(at 101.6 380.365 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "15n"
-			(at 101.6 386.715 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
-			(at 101.6 383.54 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 101.6 383.54 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Inductor"
-			(at 101.6 383.54 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_keywords" "inductor choke coil reactor magnetic"
-			(at 101.6 383.54 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_fp_filters" "Choke_* *Coil* Inductor_* L_*"
-			(at 101.6 383.54 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "18a2f589-ff0d-5563-bba8-2f04c42b024d")
-		)
-		(pin "2"
-			(uuid "43845342-324c-5d8d-8b1b-bea18490793f")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "L4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:L")
-		(at 274.32 342.9 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "ca7e5de7-1ae6-5965-b34e-419bb0229d87")
-		(property "Reference" "L5"
-			(at 274.32 339.725 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "9n1"
-			(at 274.32 346.075 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Inductor_SMD:L_0402_1005Metric"
-			(at 274.32 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 274.32 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Inductor"
-			(at 274.32 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_keywords" "inductor choke coil reactor magnetic"
-			(at 274.32 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "ki_fp_filters" "Choke_* *Coil* Inductor_* L_*"
-			(at 274.32 342.9 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "a4ea4512-24ca-54be-8d51-077df62125e4")
-		)
-		(pin "2"
-			(uuid "70671b5c-cb45-5b78-ab4a-84010a9a67d6")
-		)
-		(instances
-			(project "mesh"
-				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
-					(reference "L5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:R")
 		(at 147.32 60.96 90)
 		(unit 1)
@@ -17389,7 +16412,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "470R"
 			(at 78.74 244.475 270)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17579,6 +16602,222 @@
 	)
 	(symbol
 		(lib_id "Device:R")
+		(at 307.34 220.98 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "d5e136d6-6277-574f-8f40-f4e66ad29eda")
+		(property "Reference" "R12"
+			(at 309.88 219.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "4k7"
+			(at 309.88 222.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 307.34 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 307.34 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 307.34 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 307.34 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 307.34 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "83fac236-67a4-5110-a51d-926cf0a13f51")
+		)
+		(pin "2"
+			(uuid "4ca71510-9542-513d-8c27-90d8f8fab9bc")
+		)
+		(instances
+			(project "mesh"
+				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
+					(reference "R12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 327.66 220.98 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "38894003-6830-5fb2-8dc2-7684166921e9")
+		(property "Reference" "R13"
+			(at 330.2 219.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "4k7"
+			(at 330.2 222.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 327.66 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 327.66 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 327.66 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 327.66 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 327.66 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "aaa90b5d-a8c1-5113-82fa-20819b9894bc")
+		)
+		(pin "2"
+			(uuid "f558b315-972b-5bca-88ed-ef6911b049a1")
+		)
+		(instances
+			(project "mesh"
+				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
+					(reference "R13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
 		(at 314.96 220.98 0)
 		(unit 1)
 		(body_style 1)
@@ -17680,6 +16919,107 @@
 			(project "mesh"
 				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
 					(reference "R14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 281.94 342.9 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f82f080f-d494-5965-9d65-b790d8d6327a")
+		(property "Reference" "R15"
+			(at 281.94 339.725 270)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 281.94 346.075 270)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 281.94 342.9 270)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 281.94 342.9 270)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 281.94 342.9 270)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 281.94 342.9 270)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 281.94 342.9 270)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5008d05a-9da7-5f0d-b470-d8d7a6d194a3")
+		)
+		(pin "2"
+			(uuid "59615a4b-e087-5e0e-a206-b7cde1f0cda7")
+		)
+		(instances
+			(project "mesh"
+				(path "/0b615b16-95cb-58dc-b71b-2003a6ff7fa2"
+					(reference "R15")
 					(unit 1)
 				)
 			)
@@ -18206,7 +17546,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 149.86 337.82 90)
+		(at 165.1 325.12 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -18216,7 +17556,7 @@
 		(dnp no)
 		(uuid "7d62abb0-aec9-50fd-95a6-954a3312ad9d")
 		(property "Reference" "R7"
-			(at 149.86 334.645 270)
+			(at 165.1 321.945 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -18226,7 +17566,7 @@
 			)
 		)
 		(property "Value" "100R"
-			(at 149.86 340.995 270)
+			(at 165.1 328.295 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -18236,7 +17576,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 149.86 337.82 270)
+			(at 165.1 325.12 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18247,7 +17587,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 149.86 337.82 270)
+			(at 165.1 325.12 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18258,7 +17598,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 149.86 337.82 270)
+			(at 165.1 325.12 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18269,7 +17609,7 @@
 			)
 		)
 		(property "ki_keywords" "R res resistor"
-			(at 149.86 337.82 270)
+			(at 165.1 325.12 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18280,7 +17620,7 @@
 			)
 		)
 		(property "ki_fp_filters" "R_*"
-			(at 149.86 337.82 270)
+			(at 165.1 325.12 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18307,7 +17647,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 149.86 388.62 90)
+		(at 165.1 388.62 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -18317,7 +17657,7 @@
 		(dnp no)
 		(uuid "ac49f7df-c157-5f61-b6d3-547fda8e28cc")
 		(property "Reference" "R8"
-			(at 149.86 385.445 270)
+			(at 165.1 385.445 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -18327,7 +17667,7 @@
 			)
 		)
 		(property "Value" "100R"
-			(at 149.86 391.795 270)
+			(at 165.1 391.795 270)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -18337,7 +17677,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 149.86 388.62 270)
+			(at 165.1 388.62 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18348,7 +17688,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 149.86 388.62 270)
+			(at 165.1 388.62 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18359,7 +17699,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 149.86 388.62 270)
+			(at 165.1 388.62 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18370,7 +17710,7 @@
 			)
 		)
 		(property "ki_keywords" "R res resistor"
-			(at 149.86 388.62 270)
+			(at 165.1 388.62 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18381,7 +17721,7 @@
 			)
 		)
 		(property "ki_fp_filters" "R_*"
-			(at 149.86 388.62 270)
+			(at 165.1 388.62 270)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18427,7 +17767,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "470R"
 			(at 78.74 216.535 270)
 			(show_name no)
 			(do_not_autoplace no)
@@ -20637,7 +19977,7 @@
 				(justify left)
 			)
 		)
-		(property "MPN" "TG2520SMN 32.0000M"
+		(property "MPN" "TG2520SMN 32.0000M-ECGNNM"
 			(at 439.42 137.16 0)
 			(hide yes)
 			(show_name no)
