@@ -31,6 +31,26 @@ from layout import Chain
 REV = "B"
 DATE = "2026-08-23"
 
+# Decisions that layout depends on. `None` means UNDECIDED, and ready_to_route.py fails
+# the gate on any None -- so an open question cannot be forgotten into a fab order. Each
+# entry records the reason, because a bare number invites someone to "improve" it later.
+STACKUP = dict(
+    layers=None,          # 2 or 4 -- gated on the RF shunt-cap via-inductance question
+    thickness_mm=0.8,     # set BY THE CONNECTOR: the JAE DX07P024AJ1 straddle plug
+                          # specifies 0.8 +/-0.08 mm pad-to-pad, and the board edge is the
+                          # plug's tongue. Not a free choice.
+    copper_oz=1,
+    finish="ENIG",        # 0.8 mm board, 0.4 mm pitch QFN, and an RF front end
+)
+
+DECISIONS = dict(
+    rf_network=None,      # "discrete" or "johanson-ipd"
+    antenna=None,         # "sma-edge" or a chip-antenna MPN
+    flash_mpn=None,       # must boot with the stock RP2040 boot2, or name the override
+    rails=None,           # "one-ldo" or "two-ldo"
+    ferrite_fb1=None,     # True to keep, False to delete
+)
+
 FP = dict(
     RP2040="zach:RP2040-QFN-56-1EP_7x7mm_P0.4mm_EP-vias",
     SX1262="zach:SX1262-QFN-24-1EP_4x4mm_P0.5mm_EP-vias",
@@ -60,16 +80,41 @@ s = Sch(paper="A2", project="mesh", title="Pikkolo Mesh Stick", rev=REV, date=DA
 R_, C_, L_ = "Device:R", "Device:C", "Device:L"
 
 
-def cap(ref, x, y, val, fp=FP["C"], angle=0, **kw):
-    s.place(ref, C_, x, y, value=val, footprint=fp, angle=angle, **kw)
+# Passive part numbers, keyed by (kind, value, package). Anything not listed here falls
+# through as a bare value, and check_design.py reports it as an unsourced BOM line -- so
+# the table is self-policing: a part with no number cannot quietly reach a fab.
+#
+# The RF entries are not interchangeable with the generic ones. A 3 pF X7R in the matching
+# network has a Q of 10-50 at 915 MHz against 300-1000 for an RF C0G, and the tolerance
+# has to be +/-0.1 pF because the values themselves are that small. Likewise the block D
+# inductors must be wirewound: multilayer ferrite 0402 parts run Q = 8-20 at 900 MHz,
+# which is most of a dB of TX power.
+PASSIVES = {}
 
 
-def res(ref, x, y, val, dnp=False, angle=0, **kw):
-    s.place(ref, R_, x, y, value=val, footprint=FP["R"], dnp=dnp, angle=angle, **kw)
+def _passive(kind, val, fp, extra=None):
+    """Merge the catalogue entry for a passive into its schematic properties."""
+    pkg = fp.rsplit("_", 1)[0].rsplit("_", 1)[-1]
+    props = dict(PASSIVES.get((kind, val, pkg), {}))
+    if extra:
+        props.update(extra)
+    return props
 
 
-def ind(ref, x, y, val, angle=0, **kw):
-    s.place(ref, L_, x, y, value=val, footprint=FP["L"], angle=angle, **kw)
+def cap(ref, x, y, val, fp=FP["C"], angle=0, props=None, **kw):
+    s.place(ref, C_, x, y, value=val, footprint=fp, angle=angle,
+            props=_passive("C", val, fp, props), **kw)
+
+
+def res(ref, x, y, val, dnp=False, angle=0, props=None, **kw):
+    s.place(ref, R_, x, y, value=val, footprint=FP["R"], dnp=dnp, angle=angle,
+            props=_passive("R", val, FP["R"], props), **kw)
+
+
+def ind(ref, x, y, val, angle=0, fp=None, props=None, **kw):
+    fp = fp or FP["L"]
+    s.place(ref, L_, x, y, value=val, footprint=fp, angle=angle,
+            props=_passive("L", val, fp, props), **kw)
 
 
 def flag(ref, x, y):

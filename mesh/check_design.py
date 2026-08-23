@@ -33,6 +33,12 @@ SUPPLY_ETYPES = {"power_in"}
 # Parts that are not real BOM lines.
 NON_BOM_PREFIX = ("#PWR", "#FLG", "TP")
 
+# References whose footprint deliberately carries pads the symbol does not name.
+# J2: a USB 2.0 Type-C plug has no B6/B7 contacts and no SuperSpeed or SBU contacts, but
+# the full-featured land pattern still lands pads for them. Type-C R2.4 Table 3-11 note 5
+# says those must be left unconnected, so the slack is the spec, not an oversight.
+PAD_SLACK = {"J2"}
+
 
 def _fp_libs():
     """{libname: path} from the global footprint table, env vars expanded."""
@@ -77,6 +83,8 @@ def check():
 
     nl = S.intended_netlist()
     ref_of = {r: p.reference for r, p in S.parts.items()}
+    MULTI_UNIT = {ref for ref in {p.reference for p in S.parts.values()}
+                  if sum(1 for q in S.parts.values() if q.reference == ref) > 1}
     part_of_ref = {}
     for r, p in S.parts.items():
         part_of_ref.setdefault(p.reference, []).append(p)
@@ -95,6 +103,29 @@ def check():
         ok, detail = resolve_footprint(p.footprint)
         if not ok:
             add("FAIL", "footprint", "%s (%s): %s" % (p.reference, p.value, detail))
+
+    # --- 2b. symbol pins vs footprint pads ---------------------------------
+    # A symbol pin with no pad to land on is an unrouteable net; a pad with no pin is
+    # unconnected copper. Both are silent -- ERC checks the schematic and DRC checks the
+    # board, and neither compares the two.
+    for r, p in sorted(S.parts.items()):
+        if r.startswith(("#PWR", "#FLG")):
+            continue
+        ok, path = resolve_footprint(p.footprint)
+        if not ok:
+            continue                                  # already reported above
+        pads = set(re.findall(r'\(pad "([^"]+)"', pathlib.Path(path).read_text()))
+        pins_ = set(p.pins)
+        if p.reference in MULTI_UNIT:                 # gates share one footprint
+            continue
+        missing = pins_ - pads
+        if missing:
+            add("FAIL", "pad-map", "%s: symbol pin(s) %s have no pad in %s"
+                % (p.reference, ",".join(sorted(missing)), p.footprint))
+        extra = pads - pins_
+        if extra and p.reference not in PAD_SLACK:
+            add("WARN", "pad-map", "%s: footprint pad(s) %s have no symbol pin"
+                % (p.reference, ",".join(sorted(extra))))
 
     # --- 3. no single-pin nets ---------------------------------------------
     for net, nodes in nl.items():
