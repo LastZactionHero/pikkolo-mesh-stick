@@ -29,8 +29,11 @@ class Chain:
     pin of a joint keeps its label; the second is silenced.
     """
 
-    def __init__(self, sch, x, y, footprints, mirror=False):
+    def __init__(self, sch, x, y, footprints, mirror=False, catalogue=None):
         self.s, self.x0, self.y, self.fp = sch, float(x), float(y), footprints
+        # Parts placed through a Chain must reach the part-number catalogue the same way
+        # cap()/res()/ind() do, or they silently land in the BOM with no MPN.
+        self.cat = catalogue or (lambda kind, val, fp: {})
         self.dir = -1 if mirror else 1
         self.angle = 270 if mirror else 90
         self.n = 0
@@ -56,7 +59,8 @@ class Chain:
         mistake verify_netlist.py exists to catch.
         """
         self.s.place(ref, LIB[kind], self.slot(self.n), self.y, value=val,
-                     footprint=self.fp[kind], angle=self.angle, **kw)
+                     footprint=self.fp[kind], angle=self.angle,
+                     props=self.cat(kind, val, self.fp[kind]), **kw)
         self.s.net(a, "%s.1" % ref)
         self.s.net(b, "%s.2" % ref)
         if self.n:
@@ -74,7 +78,7 @@ class Chain:
         """A part from a chain node down to `to`, hanging off the joint carrying it."""
         x = self.nodes[node]
         self.s.place(ref, LIB[kind], x, self.y + DROP, value=val,
-                     footprint=self.fp[kind], **kw)
+                     footprint=self.fp[kind], props=self.cat(kind, val, self.fp[kind]), **kw)
         self.s.net(node, "%s.1" % ref)
         self.s.net(to, "%s.2" % ref)
         self.s.quiet_pin("%s.1" % ref)
@@ -86,7 +90,8 @@ class Chain:
         xa, xb = self.nodes[a], self.nodes[b]
         y = self.y - above
         self.s.place(ref, LIB[kind], (xa + xb) / 2.0, y, value=val,
-                     footprint=self.fp[kind], angle=90, **kw)
+                     footprint=self.fp[kind], angle=90,
+                     props=self.cat(kind, val, self.fp[kind]), **kw)
         self.s.net(a, "%s.1" % ref)
         self.s.net(b, "%s.2" % ref)
         self.s.quiet_pin("%s.1" % ref, "%s.2" % ref)

@@ -54,8 +54,8 @@ STACKUP = dict(
 
 DECISIONS = dict(
     rf_network="johanson-ipd",   # 0900FM15K0039001E -- see block D
-    antenna=None,         # "sma-edge" or a chip-antenna MPN
-    flash_mpn=None,       # must boot with the stock RP2040 boot2, or name the override
+    antenna="ufl-bulkhead",      # u.FL on board + SMA(F) bulkhead pigtail
+    flash_mpn="W25Q128JVSIQ",    # QE fixed in silicon; no boot2 override needed
     rails="two-ldo",      # U6 carries the whole radio: 120 mA at +22 dBm. Worst case
                           # (5.5-3.3)*0.120 = 0.264 W into a SOT-23-5 at RthJA 193.4 C/W
                           # = 51 C rise. Acceptable, and a shared rail would put RP2040
@@ -76,7 +76,7 @@ FP = dict(
     LED="LED_SMD:LED_0603_1608Metric",
     SW="Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A",
     USBC="Connector_USB:USB_C_Plug_JAE_DX07P024AJ1",
-    SMA="Connector_Coaxial:SMA_Amphenol_132289_EdgeMount",
+    UFL="Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical",
     IPD="RF_Converter:Balun_Johanson_0900FM15K0039",
     TP="TestPoint:TestPoint_Pad_D1.0mm",
     R="Resistor_SMD:R_0402_1005Metric",
@@ -103,7 +103,47 @@ R_, C_, L_ = "Device:R", "Device:C", "Device:L"
 # has to be +/-0.1 pF because the values themselves are that small. Likewise the block D
 # inductors must be wirewound: multilayer ferrite 0402 parts run Q = 8-20 at 900 MHz,
 # which is most of a dB of TX power.
-PASSIVES = {}
+PASSIVES = {
+    # ceramics -- generic X7R/X5R for bypass, C0G for anything timing or RF
+    ("C", "15p",  "0402"): dict(MPN="0402CG150J500NT", Manufacturer="FH", LCSC="C1548",
+                                Dielectric="C0G", Tolerance="5%", Voltage="50V"),
+    ("C", "10p",  "0402"): dict(MPN="CL05C100JB5NNNC", Manufacturer="Samsung", LCSC="C32949",
+                                Dielectric="C0G", Tolerance="5%", Voltage="50V"),
+    ("C", "39p",  "0402"): dict(MPN="CC0402JRNPO9BN390", Manufacturer="YAGEO", LCSC="C106223",
+                                Dielectric="NP0", Tolerance="5%", Voltage="50V"),
+    ("C", "1n",   "0402"): dict(MPN="0402B102K500NT", Manufacturer="FH", LCSC="C1523",
+                                Dielectric="X7R", Tolerance="10%", Voltage="50V"),
+    ("C", "47n",  "0402"): dict(MPN="0402B473K250NT", Manufacturer="FH", LCSC="C285062",
+                                Dielectric="X7R", Tolerance="10%", Voltage="25V"),
+    ("C", "100n", "0402"): dict(MPN="CL05B104KO5NNNC", Manufacturer="Samsung", LCSC="C1525",
+                                Dielectric="X7R", Tolerance="10%", Voltage="16V"),
+    ("C", "470n", "0402"): dict(MPN="CL05A474KP5NNNC", Manufacturer="Samsung", LCSC="C47339",
+                                Dielectric="X5R", Tolerance="10%", Voltage="10V"),
+    ("C", "1u",   "0402"): dict(MPN="CL05A105KA5NQNC", Manufacturer="Samsung", LCSC="C52923",
+                                Dielectric="X5R", Tolerance="10%", Voltage="25V"),
+    ("C", "4u7",  "0603"): dict(MPN="CL10A475KO8NNNC", Manufacturer="Samsung", LCSC="C19666",
+                                Dielectric="X5R", Tolerance="10%", Voltage="16V"),
+    # RF: C0G, +/-0.1pF, high Q. Only the antenna-pi shunts survive the IPD, and they are
+    # DNP -- but they stay specified so a tuning spin can order them without re-deriving.
+    ("C", "3p9",  "0402"): dict(MPN="GJM1555C1H3R9BB01D", Manufacturer="Murata", LCSC="C76907",
+                                Dielectric="C0G", Tolerance="+/-0.1pF", Voltage="50V"),
+    # the one inductor left: the PA drain choke, whose DCR sits in series with the PA supply
+    ("L", "47n",  "0402"): dict(MPN="LQW15AN47NG80D", Manufacturer="Murata", LCSC="C237556",
+                                Tolerance="2%", Description="wirewound, 648mOhm, 440mA"),
+    # resistors, all UNI-ROYAL 1% thin film
+    ("R", "27R",  "0402"): dict(MPN="0402WGF270JTCE", Manufacturer="UNI-ROYAL", LCSC="C25100",
+                                Tolerance="1%"),
+    ("R", "100R", "0402"): dict(MPN="0402WGF1000TCE", Manufacturer="UNI-ROYAL", LCSC="C25076",
+                                Tolerance="1%"),
+    ("R", "220R", "0402"): dict(MPN="0402WGF2200TCE", Manufacturer="UNI-ROYAL", LCSC="C25091",
+                                Tolerance="1%"),
+    ("R", "1k",   "0402"): dict(MPN="0402WGF1001TCE", Manufacturer="UNI-ROYAL", LCSC="C11702",
+                                Tolerance="1%"),
+    ("R", "5k1",  "0402"): dict(MPN="0402WGF5101TCE", Manufacturer="UNI-ROYAL", LCSC="C25905",
+                                Tolerance="1%", Description="USB-C Rd; 1 percent, 100ppm"),
+    ("R", "10k",  "0402"): dict(MPN="0402WGF1002TCE", Manufacturer="UNI-ROYAL", LCSC="C25744",
+                                Tolerance="1%"),
+}
 
 
 def _passive(kind, val, fp, extra=None):
@@ -172,7 +212,9 @@ s.text(15.24, 22.86, "A  USB-C plug entry, ESD, power rails")
 # for a stack-up: RP2040's USB is full-speed 12 Mbit/s and the run is under 25 mm, so it
 # never behaves as a transmission line on any of these builds.)  [usbc]
 s.place("J2", "Connector:USB_C_Plug_USB2.0", 38.1, 71.12, value="USB-C plug",
-        footprint=FP["USBC"])
+        footprint=FP["USBC"],
+        props={"MPN": "DX07P024AJ1R1500", "Manufacturer": "JAE", "LCSC": "C5352764",
+               "Description": "Straddle-mount USB-C plug; hand-fit after the SMT run."})
 s.net("VBUS", "J2.A4")                     # A4/A9/B4/B9 are one stacked pin
 s.net("GND", "J2.A1", "J2.SH")             # A1/A12/B1/B12 stacked; shell to GND
 s.net("USB_CC", "J2.A5")
@@ -189,7 +231,8 @@ s.net("USB_CC", "R11.1")
 s.net("GND", "R11.2")
 
 s.place("U7", "Power_Protection:USBLC6-2SC6", 106.68, 66.04, value="USBLC6-2SC6",
-        footprint=FP["SOT23_6"])
+        footprint=FP["SOT23_6"],
+        props={"MPN": "USBLC6-2SC6", "Manufacturer": "UMW", "LCSC": "C2687116"})
 s.net("USB_DP_C", "U7.1")
 s.net("USB_DM_C", "U7.3")
 s.net("VBUS", "U7.5")
@@ -226,25 +269,32 @@ decouple("C26", 33.02, 132.08, "4u7", "VBUS", fp=FP["C0603"])
 decouple("C27", 60.96, 132.08, "1u", "VBUS")
 
 s.place("U5", "Regulator_Linear:ME6211C33M5", 111.76, 116.84, value="ME6211C33M5G",
-        footprint=FP["SOT23_5"])
+        footprint=FP["SOT23_5"],
+        props={"MPN": "ME6211C33M5G-N", "Manufacturer": "Microne", "LCSC": "C82942"})
 s.net("VBUS", "U5.1", "U5.3")            # CE tied to VIN: always on
 s.net("GND", "U5.2")
 s.net("+3V3", "U5.5")
 s.no_connect("U5.4")
 decouple("C15", 91.44, 132.08, "1u", "VBUS")   # U5 local VIN
 decouple("C16", 137.16, 132.08, "1u", "+3V3")
-decouple("C18", 157.48, 132.08, "10u", "+3V3", fp=FP["C0603"])
+decouple("C18", 157.48, 132.08, "4u7", "+3V3", fp=FP["C0603"])
 rail("#PWR_3V3A", "power:+3V3", 177.8, 116.84)
 s.net("+3V3", "#PWR_3V3A.1")
 
 s.place("U6", "Regulator_Linear:LP5907MFX-3.3", 111.76, 152.4, value="LP5907MFX-3.3",
-        footprint=FP["SOT23_5"])
+        footprint=FP["SOT23_5"],
+        props={"MPN": "LP5907MFX-3.3/NOPB", "Manufacturer": "Texas Instruments",
+               "LCSC": "C80670",
+               "Description": "Genuine TI part only. The LCSC clones are 50uVrms and "
+                              "70dB PSRR against 10uVrms and 82dB for the TI part -- a "
+                              "clone turns U6 into a second ME6211 and deletes the "
+                              "reason it exists."})
 s.net("VBUS", "U6.1", "U6.3")
 s.net("GND", "U6.2")
 s.net("+3V3_RF", "U6.5")
 s.no_connect("U6.4")
 decouple("C17", 137.16, 167.64, "1u", "+3V3_RF")
-decouple("C19", 157.48, 167.64, "10u", "+3V3_RF", fp=FP["C0603"])
+decouple("C19", 157.48, 167.64, "4u7", "+3V3_RF", fp=FP["C0603"])
 decouple("C14", 91.44, 167.64, "100n", "+3V3_RF")
 rail("#PWR_RFA", "zach:+3V3_RF", 177.8, 152.4)
 s.net("+3V3_RF", "#PWR_RFA.1")
@@ -257,7 +307,8 @@ s.text(210.82, 22.86, "B  RP2040, QSPI flash, crystal, buttons")
 # footprint puts no vias in it, which on two layers leaves every return current looking
 # for a path to the bottom pour that somebody has to remember to draw.
 s.place("U1", "MCU_RaspberryPi:RP2040", 281.94, 132.08, value="RP2040",
-        footprint=FP["RP2040"])
+        footprint=FP["RP2040"],
+        props={"MPN": "RP2040", "Manufacturer": "Raspberry Pi", "LCSC": "C2040"})
 
 s.net("+3V3", "U1.1", "U1.43", "U1.44", "U1.48")   # IOVDD(x6 stacked), ADC_AVDD, VREG_VIN, USB_VDD
 s.net("DVDD", "U1.23", "U1.45")                    # VREG_VOUT feeds DVDD  [rpi]
@@ -289,7 +340,8 @@ s.net("RUN", "R5.2")
 # and 1k in series: 15p||15p = 7.5p, +3p stray = 10.5p ~= CL. The 27p this carried before
 # implies CL=16.5pF, which matches no specified crystal and eats start-up margin.  [rpi]
 s.place("Y1", "Device:Crystal_GND24", 231.14, 187.96, value="12MHz CL10p",
-        footprint=FP["XTAL"], props={"MPN": "ABM8-272-T3", "Manufacturer": "Abracon"})
+        footprint=FP["XTAL"], props={"MPN": "ABM8-272-T3", "Manufacturer": "Abracon", "LCSC": "C20625731",
+               "Description": "12MHz, CL=10pF -- the CL the 15p loads are sized for"})
 res("R3", 254.0, 187.96, "1k")
 cap("C1", 220.98, 205.74, "15p")
 cap("C2", 251.46, 205.74, "15p")
@@ -299,7 +351,20 @@ s.net("XOUT", "R3.2", "U1.21")
 s.net("GND", "C1.2", "C2.2", "Y1.2")
 
 # QSPI flash
-s.place("U3", "zach:GD25Q32E", 355.6, 187.96, value="GD25Q32E", footprint=FP["SOIC8"])
+# NOT a GigaDevice part. The RP2040's stock second stage (boot2_w25q080) sets the flash's
+# quad-enable bit with a one-byte 01h command followed by TWO data bytes in a single CS#
+# assertion; the GD25Q32E datasheet says that form is not executed at all, so QE stays 0,
+# the EBh quad read returns garbage and the chip faults out of boot2. The symptom is the
+# nastiest kind: it enumerates as RPI-RP2 and accepts a UF2, then never runs.
+# The Winbond "...IQ" order codes ship with QE already fixed to 1, so boot2's 35h check
+# short-circuits and the offending write is never issued -- the bug class cannot occur.
+# This one is also a JLCPCB Basic part, so no extended-part fee and no stock roulette.
+s.place("U3", "Memory_Flash:W25Q128JVS", 355.6, 187.96, value="W25Q128JVSIQ",
+        footprint=FP["SOIC8"],
+        props={"MPN": "W25Q128JVSIQ", "Manufacturer": "Winbond", "LCSC": "C97521",
+               "Description": "16MB QSPI NOR flash, SOIC-8 208mil. QE fixed at 1 in "
+                              "silicon (IQ order code) so the stock RP2040 boot2 never "
+                              "issues its two-byte WRSR. JLCPCB Basic."})
 decouple("C12", 388.62, 187.96, "100n", "+3V3")
 s.net("+3V3", "U3.8")
 s.net("GND", "U3.4")
@@ -320,21 +385,22 @@ s.net("QSPI_SS", "R14.2")
 # BOOTSEL pulls QSPI_SS low through 1K -- with R14 fitted the divider gives 0.30V  [rpi]
 res("R4", 332.74, 246.38, "1k", angle=90)
 s.net("QSPI_SS", "R4.1")
-s.place("TP5", "Connector:TestPoint", 358.14, 246.38, value="BOOTSEL", footprint=FP["TP"])
+s.place("TP5", "Connector:TestPoint", 358.14, 246.38, value="BOOTSEL", footprint=FP["TP"], in_bom=False)
 s.net("BOOT_SW", "R4.2", "TP5.1")
 
 # User button on GPIO6  [chosen] — the stock variant sets BUTTON_PIN -1
-s.place("SW1", "Switch:SW_Push", 355.6, 274.32, value="USER", footprint=FP["SW"])
+s.place("SW1", "Switch:SW_Push", 355.6, 274.32, value="USER", footprint=FP["SW"],
+        props={"MPN": "TS-1187A-B-A-B", "Manufacturer": "XKB", "LCSC": "C318884"})
 s.net("BTN_USER", "SW1.1", "U1.8")
 s.net("GND", "SW1.2")
 
-s.place("TP1", "Connector:TestPoint", 226.06, 246.38, value="SWCLK", footprint=FP["TP"])
-s.place("TP2", "Connector:TestPoint", 246.38, 246.38, value="SWDIO", footprint=FP["TP"])
-s.place("TP3", "Connector:TestPoint", 266.7, 246.38, value="GND", footprint=FP["TP"])
-s.place("TP4", "Connector:TestPoint", 287.02, 246.38, value="RUN", footprint=FP["TP"])
+s.place("TP1", "Connector:TestPoint", 226.06, 246.38, value="SWCLK", footprint=FP["TP"], in_bom=False)
+s.place("TP2", "Connector:TestPoint", 246.38, 246.38, value="SWDIO", footprint=FP["TP"], in_bom=False)
+s.place("TP3", "Connector:TestPoint", 266.7, 246.38, value="GND", footprint=FP["TP"], in_bom=False)
+s.place("TP4", "Connector:TestPoint", 287.02, 246.38, value="RUN", footprint=FP["TP"], in_bom=False)
 s.net("RUN", "TP4.1")
-s.place("TP6", "Connector:TestPoint", 307.34, 246.38, value="SDA", footprint=FP["TP"])
-s.place("TP7", "Connector:TestPoint", 327.66, 246.38, value="SCL", footprint=FP["TP"])
+s.place("TP6", "Connector:TestPoint", 307.34, 246.38, value="SDA", footprint=FP["TP"], in_bom=False)
+s.place("TP7", "Connector:TestPoint", 327.66, 246.38, value="SCL", footprint=FP["TP"], in_bom=False)
 s.net("I2C_SDA", "U1.6", "TP6.1")                  # GPIO4 = Wire0 SDA
 s.net("I2C_SCL", "U1.7", "TP7.1")                  # GPIO5 = Wire0 SCL
 res("R12", 307.34, 220.98, "4k7")                  # I2C is open drain: the bus cannot be
@@ -353,7 +419,8 @@ s.text(431.8, 22.86, "C  SX1262 + 32MHz TCXO")
 # The exposed pad is both the thermal path for ~230 mW at +22 dBm and the radio's whole
 # ground return on two layers, so the footprint carries its own vias.  [semtech]
 s.place("U2", "RF:SX1262IMLTRT", 490.22, 106.68, value="SX1262IMLTRT",
-        footprint=FP["SX1262"])
+        footprint=FP["SX1262"],
+        props={"MPN": "SX1262IMLTRT", "Manufacturer": "Semtech", "LCSC": "C191341"})
 
 # VDD_IN (1) ties straight to VBAT (10); VBAT_IO (11) shares the SAME rail so the
 # datasheet rule "VBAT_IO <= VBAT at all times" cannot be broken by LDO ramp skew.
@@ -361,7 +428,7 @@ decouple("C10", 439.42, 40.64, "100n", "+3V3_RF", at="VDD_IN/VBAT pins 1/10/11 H
 decouple("C11", 454.66, 40.64, "1u", "+3V3_RF", at="VBAT/VBAT_IO bulk for the PA step")
 decouple("C29", 469.9, 40.64, "470n", "SX_VREG")   # VREG  [ws]
 decouple("C30", 485.14, 40.64, "47n", "VR_PA")     # VR_PA coarse  [ws]
-decouple("C37", 500.38, 40.64, "47p", "VR_PA")     # VR_PA fine  [ws]
+decouple("C37", 500.38, 40.64, "39p", "VR_PA")     # VR_PA fine [ws]; shares C22/C32 line
 s.net("+3V3_RF", "U2.1", "U2.10", "U2.11")
 s.net("GND", "U2.2")
 s.net("SX_VREG", "U2.7")
@@ -388,12 +455,14 @@ s.net("LORA_DIO1", "U2.13", "U1.27")               # GPIO16
 # carry is an HCMOS oscillator, and driving its pin 1 high was wiring an enable that the
 # real part does not have. The 2520 body is also where the cheap 32 MHz parts live.
 s.place("Y2", "Oscillator:TG2520SMN-xx.xxxxxxMhz-xxxxNM", 439.42, 137.16,
-        value="32MHz TCXO 1.8V clipped-sine", footprint=FP["TCXO"],
-        props={"MPN": "TG2520SMN 32.0000M-ECGNNM", "Manufacturer": "Seiko Epson",
-               "LCSC": "C7527388",
-               "Description": "32.000MHz TCXO, clipped sine 0.2-1.2Vpp, Vcc 1.7-3.6V, "
-                              "ICC <=3mA, start-up <=5ms (RadioLib gates at 5ms), "
-                              "stability <=+/-2ppm"})
+        value="32MHz TCXO 3.0V clipped-sine", footprint=FP["TCXO"],
+        props={"MPN": "TG2520SMN 32.000000M-MCGNNM", "Manufacturer": "Seiko Epson",
+               "LCSC": "C3007516",
+               "Description": "32.000MHz TCXO, clipped sine, Vcc 2.66-3.465V, Icc 1.8mA "
+                              "max, start-up 2.0ms max. Program DIO3 to 3.0V: VBAT 3.3V "
+                              "satisfies VBAT >= VTCXO+200mV with 300mV to spare. The "
+                              "1.8V sibling ECGNNM is a trap -- RadioLib defaults "
+                              "tcxoVoltage to 1.6V, below that part 1.7V minimum."})
 decouple("C13", 439.42, 162.56, "100n", "VDD_TCXO")
 series("R6", "R", 469.9, 129.54, "220R", "TCXO_OUT", "TCXO_AC", angle=90)
 series("C40", "C", 485.14, 129.54, "10p", "TCXO_AC", "XTA", angle=90)
@@ -450,7 +519,8 @@ s.net("IPD_TX", "FL1.8")
 s.net("IPD_RX", "FL1.6")
 
 # --- SPDT switch, complementary control  [variant] -------------------------
-s.place("U4", "zach:PE4259-63", 190.5, 358.14, value="PE4259-63", footprint=FP["SC70_6"])
+s.place("U4", "zach:PE4259-63", 190.5, 358.14, value="PE4259-63", footprint=FP["SC70_6"],
+        props={"MPN": "PE4259-63", "Manufacturer": "pSemi", "LCSC": "C470892"})
 s.net("RF_TX", "U4.1")                             # RF1 = TX  [semtech]
 s.net("RF_RX", "U4.3")                             # RF2 = RX
 s.net("RF_ANT", "U4.5")
@@ -469,13 +539,27 @@ s.net("RF_SW_NCTRL", "U1.28")                      # GPIO17 drives the complemen
 # so the pi is not fitted. Its lands stay as a tuning option: R15 is a 0R link in the
 # series position and C33/C34 are unpopulated. If the FCC pre-scan needs more suppression
 # at 3f0-5f0, fit 9n1 in place of R15 and populate the shunts.
-ant = Chain(s, 266.7, TXY, RFFP)
+ant = Chain(s, 266.7, TXY, RFFP, catalogue=_passive)
 ant.series("C32", "C", "39p", "RF_ANT", "ANT1")    # DC block off RFC
 ant.series("R15", "R", "0R", "ANT1", "ANT2")       # pi series position, linked out
 ant.shunt("C33", "C", "3p9", "ANT1", dnp=True)
 ant.shunt("C34", "C", "3p9", "ANT2", dnp=True)
 
-s.place("J1", "Connector:Conn_Coaxial", 327.66, TXY, value="SMA edge", footprint=FP["SMA"])
+# u.FL on the board, SMA on the enclosure bulkhead via a pigtail -- not a board-edge SMA.
+# Two board-edge connectors would have to share one thickness window and they do not: the
+# JAE plug needs 0.72-0.88 mm and the only orderable 0.8 mm end-launch SMA (Taoglas
+# EMPCB.SMAFSTJ.B.HT) caps at 0.79 mm, while the fab delivers 0.72-0.88 mm. That leaves a
+# fab tolerance wider than the parts allow, on a part that also costs $3.40, is
+# hand-solder only, and cantilevers a brass cube on a 13 mm lever off the edge of a 0.8 mm
+# board that lives in a laptop port. u.FL is surface-mount, thickness-agnostic, $0.23, and
+# JLCPCB can place it; the strain path moves to the enclosure where it belongs.
+# NOTE the antenna convention: Meshtastic whips are SMA MALE, so the bulkhead must be a
+# standard SMA female jack, not RP-SMA.
+s.place("J1", "Connector:Conn_Coaxial", 327.66, TXY, value="u.FL",
+        footprint=FP["UFL"],
+        props={"MPN": "U.FL-R-SMT-1(10)", "Manufacturer": "Hirose", "LCSC": "C88373",
+               "Description": "u.FL RF receptacle, SMT. Mates to a u.FL-to-SMA(F) "
+                              "bulkhead pigtail; ~30 mating cycles rated."})
 s.net("ANT2", "J1.1")
 s.net("GND", "J1.2")
 
@@ -489,14 +573,16 @@ s.text(15.24, 185.42, "E  Status LEDs: heartbeat and radio activity")
 # in the tree at all, and AmbientLightingThread only knows NCP5623, LP5562 and NeoPixel.
 # This also deletes the board's only 4.5-5.5 V logic domain and its only part with under
 # 500 pieces of distributor stock.
-s.place("D1", "Device:LED", 63.5, 213.36, value="green", footprint=FP["LED"], angle=180)
+s.place("D1", "Device:LED", 63.5, 213.36, value="green", footprint=FP["LED"], angle=180,
+        props={"MPN": "XL-1608SYGC-06", "Manufacturer": "XINGLIGHT", "LCSC": "C965805"})
 res("R9", 78.74, 213.36, "470R", angle=90)
 s.net("LED_PWR", "U1.4", "D1.2")                   # GPIO2 -> anode, LED_POWER heartbeat
 s.net("LED_PWR_K", "D1.1", "R9.1")                 # cathode -> 1k -> GND
 s.net("GND", "R9.2")
 s.quiet_pin("R9.1")
 
-s.place("D2", "Device:LED", 63.5, 241.3, value="red", footprint=FP["LED"], angle=180)
+s.place("D2", "Device:LED", 63.5, 241.3, value="red", footprint=FP["LED"], angle=180,
+        props={"MPN": "KT-0603R", "Manufacturer": "Hubei KENTO", "LCSC": "C2286"})
 res("R10", 78.74, 241.3, "470R", angle=90)
 s.net("LED_LORA", "U1.5", "D2.2")                  # GPIO3 -> anode, LED_LORA activity
 s.net("LED_LORA_K", "D2.1", "R10.1")               # cathode -> 1k -> GND

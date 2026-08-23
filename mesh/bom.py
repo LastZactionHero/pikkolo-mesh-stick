@@ -90,10 +90,15 @@ def main():
     print("\n%d distinct line items, %d placements (%d fitted, %d DNP)"
           % (len(rows), sum(r["qty"] for r in rows), sum(r["qty"] for r in fitted),
              sum(r["qty"] for r in rows if r["dnp"])))
-    missing = [r for r in fitted if not r["lcsc"]]
+    missing = [r for r in fitted if not r["lcsc"] and not r["mpn"]]
     if missing:
-        print("%d of %d fitted line items still have no LCSC part number"
-              % (len(missing), len(fitted)))
+        print("%d of %d fitted line items have no part number at all: %s"
+              % (len(missing), len(fitted),
+                 ", ".join(",".join(r["refs"]) for r in missing)))
+    no_lcsc = [r for r in fitted if not r["lcsc"] and r["mpn"]]
+    if no_lcsc:
+        print("%d sourced by MPN but not stocked at LCSC (consigned / other distributor): %s"
+              % (len(no_lcsc), ", ".join(",".join(r["refs"]) for r in no_lcsc)))
     return 0
 
 
