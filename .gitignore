@@ -6,4 +6,4 @@ build/
 *~
 __pycache__/
 kicad-lib/vendor/
-kicad-lib/imported/*.pretty/
+kicad-lib/imported/
