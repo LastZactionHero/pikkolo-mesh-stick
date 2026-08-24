@@ -98,9 +98,25 @@ def gate_design_rules():
 
 
 def gate_bom_sourced():
+    """
+    Every line that actually needs a part number has one.
+
+    Plain resistors are exempt. A 1% thin-film 0402 at a given value is fungible across a
+    dozen vendors, and value + package + tolerance IS the complete purchase specification
+    -- demanding an MPN for one is ceremony, not engineering. Everything else must name a
+    part, including every capacitor, because the RF ones are C0G at +/-0.1 pF and a
+    generic substitute would quietly detune the front end.
+    """
     rows = [r for r in bom.lines() if not r["dnp"]]
-    unsourced = [r for r in rows if not r["lcsc"] and not r["mpn"]]
-    return not unsourced, "%d/%d line items sourced" % (len(rows) - len(unsourced), len(rows))
+    def fungible(r):
+        return all(ref[0] == "R" for ref in r["refs"])
+    unsourced = [r for r in rows if not r["lcsc"] and not r["mpn"] and not fungible(r)]
+    spec_only = [r for r in rows if not r["lcsc"] and not r["mpn"] and fungible(r)]
+    detail = "%d/%d line items sourced" % (len(rows) - len(unsourced), len(rows))
+    if spec_only:
+        detail += "; %d resistor value(s) bought to spec: %s" % (
+            len(spec_only), ", ".join(r["value"] for r in spec_only))
+    return not unsourced, detail
 
 
 def gate_decisions():

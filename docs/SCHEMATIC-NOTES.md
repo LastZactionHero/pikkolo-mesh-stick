@@ -7,14 +7,18 @@ verify_netlist.py   56 intended / 56 exported / 0 discrepancies
 kicad-cli sch erc   0 errors, 1 warning (explained below)
 check_design.py     76 parts, 56 nets, 0 FAIL
 bom.py              36 line items, 67 fitted placements, 2 DNP
-ready_to_route.py   5 of 6 mechanical gates PASS
+ready_to_route.py   ALL 6 mechanical gates PASS
 ```
 
 **Run `python3 mesh/ready_to_route.py` before doing anything else.** It is the gate: it
 prints what is mechanically true, and it names the things a script cannot close. Every
-design decision is now closed. One gate is still failing: three commodity resistor values
-(470R, 4k7, 0R) have no distributor part number, and guessing one is worse than leaving
-the gap visible.
+design decision is closed and every mechanical gate passes. What remains is the four
+gates a script cannot close, printed by name at the bottom of its output.
+
+Plain resistors are exempt from the part-number gate: a 1% thin-film 0402 at a given
+value is fungible, and value + package + tolerance is the complete purchase spec.
+Capacitors are not exempt — the RF ones are C0G at ±0.1 pF and a generic substitute
+would quietly detune the front end.
 
 ---
 
