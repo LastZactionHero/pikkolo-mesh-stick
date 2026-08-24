@@ -71,6 +71,15 @@ def kicad_running():
 
 
 def clone_esden():
+    """
+    Optional. This project's own design references only KiCad's stock libraries and
+    `zach:` -- nothing from esden -- so `--skip-vendor` gets a working setup without a
+    330 MB clone or any network at all, which is the faster path when moving machines.
+    The rows are still worth having if you use the collection in other projects.
+    """
+    if "--skip-vendor" in sys.argv:
+        print("  skipping esden clone (--skip-vendor)")
+        return None
     dst = LIB / "vendor" / "esden"
     if (dst / "fp-lib-table").exists():
         print("  esden library already present")
@@ -158,8 +167,10 @@ def main():
     print("\nregistered %d symbol libs, %d footprint libs" % (len(sym) - 4, len(fp) - 4))
     print("ZLIB            = %s" % LIB)
     print("KICAD_3RD_PARTY = %s" % imported)
-    print("\nNow: open mesh/mesh.kicad_pro in KiCad, or regenerate with")
-    print("  cd mesh && python3 mesh_design.py && python3 verify_netlist.py")
+    print("\nNow check the toolchain resolved on this machine:")
+    print("  cd mesh && python3 doctor.py")
+    print("then regenerate and gate:")
+    print("  python3 mesh_design.py && python3 ready_to_route.py")
 
 
 if __name__ == "__main__":

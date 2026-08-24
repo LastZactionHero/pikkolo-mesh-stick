@@ -8,15 +8,30 @@ socket.
 The schematic is captured and verified. Layout has not started, and it should not start
 until `ready_to_route.py` is green — see below.
 
-## Resume on a new machine
+## Moving to another machine
 
 ```sh
 git clone <this repo> pikkolo && cd pikkolo
-python3 setup.py                    # registers the KiCad libraries. Quit KiCad first.
+python3 setup.py --skip-vendor      # registers the KiCad libraries. Quit KiCad first.
 cd mesh
-python3 mesh_design.py              # regenerate mesh.kicad_sch
-python3 ready_to_route.py           # the gate: what is true, and what is left
+python3 doctor.py                   # did the toolchain resolve on THIS machine?
+python3 mesh_design.py               # regenerate mesh.kicad_sch
+python3 ready_to_route.py            # the gate: what is true, and what is left
 ```
+
+`doctor.py` is the one to run first after a move. It checks the things that fail
+silently: kicad-cli present and version 10, the config and shared-support directories
+found, `ZLIB` set and pointing at *this* clone, every symbol library the design
+references resolving, every footprint resolving, and the personal library present.
+A missing library table does not announce itself — it just makes every footprint vanish.
+
+`--skip-vendor` skips the 330 MB esden clone. The design references only KiCad's stock
+libraries and `zach:`, so nothing here needs it; drop the flag if you use that collection
+in other projects.
+
+Nothing in the repo carries an absolute path. Symbols are flattened into
+`mesh.kicad_sch`, so they travel with the file; footprints resolve through the `${ZLIB}`
+path variable that `setup.py` writes, so they follow the clone wherever it lands.
 
 `setup.py` writes KiCad's **global** library tables and sets two path variables (`ZLIB`,
 `KICAD_3RD_PARTY`), backing up whatever was there into `build/`. It clones the esden
@@ -42,6 +57,7 @@ The schematic is generated, so it is also checkable. Each script answers one que
 | `bom.py` | *can I order it?* — grouped BOM, `--csv` or `--jlc` to export |
 | `ready_to_route.py` | **the gate** — runs the above, plus the checks none of them cover, and names the gates a script cannot close |
 | `project_setup.py` | writes the RF / Power / USB net classes into the project file |
+| `doctor.py` | *did this machine load everything?* — run first after moving computers |
 
 `verify_netlist.py` is the one that matters most. A generated schematic fails by having a
 stub land a fraction off-grid or two labels quietly merge, and it catches exactly that. It

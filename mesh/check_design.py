@@ -40,6 +40,15 @@ NON_BOM_PREFIX = ("#PWR", "#FLG", "TP")
 PAD_SLACK = {"J2"}
 
 
+# KiCad's shared-support directory, derived from wherever schlib found the stock symbols
+# rather than hardcoded. That keeps this working on macOS (.../KiCad.app/Contents/
+# SharedSupport/) and Windows as well as Linux, which matters because this project moves
+# between machines.
+SHARE = schlib.STOCK.parent
+STOCK_FP = pathlib.Path(os.environ.get("KICAD_FOOTPRINT_DIR", SHARE / "footprints"))
+TEMPLATE = SHARE / "template"
+
+
 def _fp_libs():
     """{libname: path} from the global footprint table, env vars expanded."""
     tbl = schlib.CFG / "fp-lib-table"
@@ -47,13 +56,13 @@ def _fp_libs():
     if not tbl.exists():
         return out
     for n, u in re.findall(r'\(name "([^"]+)"\)\s*\(type "[^"]+"\)\s*\(uri "([^"]+)"', tbl.read_text()):
-        out[n] = pathlib.Path(schlib._expand(u.replace("${KICAD10_TEMPLATE_DIR}",
-                                                       "/usr/share/kicad/template")))
+        # KiCad substitutes this itself; it is not in kicad_common.json's var list.
+        u = re.sub(r"\$\{KICAD\d+_TEMPLATE_DIR\}", str(TEMPLATE), u)
+        out[n] = pathlib.Path(schlib._expand(u))
     return out
 
 
 FP_LIBS = _fp_libs()
-STOCK_FP = pathlib.Path(os.environ.get("KICAD_FOOTPRINT_DIR", "/usr/share/kicad/footprints"))
 
 
 def resolve_footprint(fp):
