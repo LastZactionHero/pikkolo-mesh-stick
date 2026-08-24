@@ -55,7 +55,7 @@ STACKUP = dict(
 DECISIONS = dict(
     rf_network="johanson-ipd",   # 0900FM15K0039001E -- see block D
     antenna="sma-right-angle",   # BWSMA-KWE-Z001, through-hole, thickness-agnostic
-    flash_mpn="W25Q32JVSSIQ",    # QE fixed in silicon; no boot2 override needed
+    flash_mpn="in-package",      # RP2354A stacks 2MB; there is no external flash
     rails="two-ldo",      # U6 carries the whole radio: 120 mA at +22 dBm. Worst case
                           # (5.5-3.3)*0.120 = 0.264 W into a SOT-23-5 at RthJA 193.4 C/W
                           # = 51 C rise. Acceptable, and a shared rail would put RP2040
@@ -65,7 +65,8 @@ DECISIONS = dict(
 )
 
 FP = dict(
-    RP2040="zach:RP2040-QFN-56-1EP_7x7mm_P0.4mm_EP-vias",
+    RP2354="zach:RP2354A-QFN-60-1EP_7x7mm_P0.4mm_EP-vias",
+    L3012="Inductor_SMD:L_Cenker_CKCS3012",
     SX1262="zach:SX1262-QFN-24-1EP_4x4mm_P0.5mm_EP-vias",
     SOIC8="Package_SO:SOIC-8_5.3x5.3mm_P1.27mm",
     SC70_6="Package_TO_SOT_SMD:SOT-363_SC-70-6",
@@ -303,102 +304,103 @@ decouple("C27", 91.44, 167.64, "4u7", "VBUS", fp=FP["C0603"], at="U6 pin 1 VIN")
 rail("#PWR_RFA", "zach:+3V3_RF", 177.8, 152.4)
 s.net("+3V3_RF", "#PWR_RFA.1")
 
-# ================================================== B. RP2040, flash, crystal, buttons
+# ================================================== B. RP2354A, crystal, buttons
 s.box(208.28, 15.24, 210.82, 279.4)
-s.text(210.82, 22.86, "B  RP2040, QSPI flash, crystal, buttons")
+s.text(210.82, 22.86, "B  RP2354A (2MB flash in package), crystal, buttons")
 
-# Pin 57, the centre pad, is the RP2040's ONLY ground connection. The stock KiCad
-# footprint puts no vias in it, which on two layers leaves every return current looking
-# for a path to the bottom pour that somebody has to remember to draw.
-s.place("U1", "MCU_RaspberryPi:RP2040", 281.94, 132.08, value="RP2040",
-        footprint=FP["RP2040"],
-        props={"MPN": "RP2040", "Manufacturer": "Raspberry Pi", "LCSC": "C2040"})
+# RP2354A, not RP2040: same die as RP2350A with a Winbond W25Q16JVWI 2MB flash die stacked
+# in the package. That deletes the external QSPI flash outright -- and with it the whole
+# class of failure that made us reject the GD25Q32E, where a flash that only accepts a
+# one-byte 01h status-register write cannot have its quad-enable bit set by the stock
+# boot2 and faults out of boot after happily enumerating.
+#
+# Pin 61, the centre pad, is again the ONLY ground connection, so the footprint carries
+# its own vias. RP2354A has no TESTEN pin.
+#
+# 2MB is enough, measured not assumed: Meshtastic's pico2 image is 978,688 B against
+# 1,536 kB of sketch space with the standard 0.5 MB LittleFS -- 62% used.
+s.place("U1", "MCU_RaspberryPi:RP2354A", 281.94, 132.08, value="RP2354A",
+        footprint=FP["RP2354"],
+        props={"MPN": "RP2354A", "Manufacturer": "Raspberry Pi", "LCSC": "C41378174",
+               "Description": "RP2350A + 2MB stacked flash, QFN-60 7x7 0.4mm. Confirm the "
+                              "die stepping on receipt: E9 (GPIO input latch) is A2-only "
+                              "and fixed in A3; DigiKey ships A4, LCSC does not publish it."})
 
-s.net("+3V3", "U1.1", "U1.43", "U1.44", "U1.48")   # IOVDD(x6 stacked), ADC_AVDD, VREG_VIN, USB_VDD
-s.net("DVDD", "U1.23", "U1.45")                    # VREG_VOUT feeds DVDD  [rpi]
-s.net("GND", "U1.57", "U1.19")                     # TESTEN must be grounded  [rpi]
-s.net("USB_DM", "U1.46")
-s.net("USB_DP", "U1.47")
+s.net("+3V3", "U1.1", "U1.44", "U1.53", "U1.54")   # IOVDD(x6 stacked), ADC_AVDD, USB_OTP_VDD, QSPI_IOVDD
+s.net("GND", "U1.61", "U1.47")                     # exposed pad + VREG_PGND
+s.net("USB_DM", "U1.51")
+s.net("USB_DP", "U1.52")
 s.net("RUN", "U1.26")
 
-# 100nF per power pin [rpi]; schematically one node, physically one cap per pin.
-# 100nF per power pin [rpi]. The IOVDD pins are stacked in the symbol, so the pin each
-# cap belongs to is recorded in its Description rather than being visible in the ratsnest.
-for ref, x, pin in [("C3", 218.44, "IOVDD pin 1"), ("C4", 233.68, "IOVDD pin 10"),
-                    ("C5", 248.92, "IOVDD pin 22"), ("C6", 264.16, "IOVDD pin 33"),
-                    ("C8", 279.4, "IOVDD pin 42"), ("C9", 294.64, "IOVDD pin 49 + USB_VDD pin 48 shared, per RPi HD 2.1.2"),
-                    ("C44", 309.88, "ADC_AVDD pin 43")]:
+# 100nF per supply pin. QSPI_IOVDD gets its own rather than sharing: on RP2354 it feeds
+# the internal flash die, must be 2.97-3.63 V, and carries that die's switching currents.
+for ref, x, pin in [("C3", 218.44, "IOVDD pin 1"), ("C4", 233.68, "IOVDD pin 11"),
+                    ("C5", 248.92, "IOVDD pin 20"), ("C6", 264.16, "IOVDD pin 30"),
+                    ("C8", 279.4, "IOVDD pin 38"), ("C9", 294.64, "IOVDD pin 45"),
+                    ("C44", 309.88, "ADC_AVDD pin 44"),
+                    ("C12", 325.12, "USB_OTP_VDD pin 53"),
+                    ("C45", 340.36, "QSPI_IOVDD pin 54 - internal flash die")]:
     decouple(ref, x, 40.64, "100n", "+3V3", at=pin)
-# The core LDO needs 1uF at BOTH ends: VREG_VIN also feeds the power-on-reset and
-# brown-out blocks, so noise there shows up as unexplained resets.  [rpi]
-decouple("C42", 325.12, 40.64, "1u", "+3V3", at="VREG_VIN pin 44")
-decouple("C7", 340.36, 40.64, "100n", "DVDD", at="DVDD pin 23")
-decouple("C43", 355.6, 40.64, "100n", "DVDD", at="DVDD pin 50")
-decouple("C28", 370.84, 40.64, "1u", "DVDD", at="VREG_VOUT pin 45")
 
-res("R5", 226.06, 96.52, "10k")                    # RUN pull-up  [rpi]
+# The core supply is a BUCK on RP2350, not the simple LDO RP2040 had. VREG_LX switches
+# into L2 and the output is the DVDD rail; VREG_FB senses it. Raspberry Pi are
+# prescriptive about the parts: 3.3uH +/-20% fully shielded, DCR <= 250 mOhm,
+# Isat >= 1.5 A, and 4.7uF at the input, the output and on VREG_AVDD.
+# DVDD and VREG_AVDD reach the chip through a passive (L2, R16), so ERC cannot see a
+# driver on either. Flag them rather than switch the rule off.
+flag("#FLG_DVDD", 297.18, 76.2)
+flag("#FLG_VAVDD", 406.4, 78.74)
+res("R16", 388.62, 96.52, "33R")                   # VREG_AVDD RC filter, ~200uA load
+s.net("+3V3", "R16.1")
+s.net("VREG_AVDD", "R16.2", "U1.46", "#FLG_VAVDD.1")
+decouple("C47", 388.62, 116.84, "4u7", "VREG_AVDD", fp=FP["C0603"], at="VREG_AVDD pin 46")
+decouple("C46", 355.6, 40.64, "4u7", "+3V3", fp=FP["C0603"], at="VREG_VIN pin 49")
+s.net("+3V3", "U1.49")
+ind("L2", 370.84, 40.64, "3u3", angle=90, fp=FP["L3012"],
+    props={"MPN": "MPN3012S3R3MT", "Manufacturer": "Cenker", "LCSC": "C52024124",
+           "Description": "RP2350 core buck inductor: 3.3uH +/-20% shielded, 135mOhm, "
+                          "Isat 1.7A. Polarity/orientation per the datasheet. VERIFY the "
+                          "land pattern against the MPN3012S drawing before fab -- the "
+                          "footprint here is a generic 3012 land."})
+s.net("VREG_LX", "U1.48", "L2.1")
+s.net("DVDD", "U1.6", "U1.50", "L2.2", "#FLG_DVDD.1")   # DVDD(x3) + VREG_FB sense
+for ref, x, pin in [("C7", 218.44, "DVDD pin 6"), ("C42", 233.68, "DVDD pin 23"),
+                    ("C43", 248.92, "DVDD pin 39")]:
+    decouple(ref, x, 60.96, "100n", "DVDD", at=pin)
+decouple("C28", 264.16, 60.96, "4u7", "DVDD", fp=FP["C0603"], at="buck output, at DVDD pin 23")
+
+res("R5", 226.06, 96.52, "10k")                    # RUN pull-up
 s.net("+3V3", "R5.1")
 s.net("RUN", "R5.2")
 
-# 12MHz crystal. Raspberry Pi's validated combination is a CL=10pF part with 15p loads
-# and 1k in series: 15p||15p = 7.5p, +3p stray = 10.5p ~= CL. The 27p this carried before
-# implies CL=16.5pF, which matches no specified crystal and eats start-up margin.  [rpi]
+# 12MHz crystal: 1K series on XOUT, 15p loads for a CL=10pF part  [rpi]
 s.place("Y1", "Device:Crystal_GND24", 231.14, 187.96, value="12MHz CL10p",
-        footprint=FP["XTAL"], props={"MPN": "ABM8-272-T3", "Manufacturer": "Abracon", "LCSC": "C20625731",
-               "Description": "12MHz, CL=10pF -- the CL the 15p loads are sized for"})
+        footprint=FP["XTAL"], props={"MPN": "ABM8-272-T3", "Manufacturer": "Abracon",
+                                     "LCSC": "C20625731",
+                                     "Description": "12MHz, CL=10pF -- the CL the 15p loads are sized for"})
 res("R3", 254.0, 187.96, "1k")
 cap("C1", 220.98, 205.74, "15p")
 cap("C2", 251.46, 205.74, "15p")
-s.net("XIN", "U1.20", "Y1.1", "C1.1")
+s.net("XIN", "U1.21", "Y1.1", "C1.1")
 s.net("XOUT_R", "Y1.3", "C2.1", "R3.1")
-s.net("XOUT", "R3.2", "U1.21")
+s.net("XOUT", "R3.2", "U1.22")
 s.net("GND", "C1.2", "C2.2", "Y1.2")
 
-# QSPI flash
-# NOT a GigaDevice part. The RP2040's stock second stage (boot2_w25q080) sets the flash's
-# quad-enable bit with a one-byte 01h command followed by TWO data bytes in a single CS#
-# assertion; the GD25Q32E datasheet says that form is not executed at all, so QE stays 0,
-# the EBh quad read returns garbage and the chip faults out of boot2. The symptom is the
-# nastiest kind: it enumerates as RPI-RP2 and accepts a UF2, then never runs.
-# The Winbond "...IQ" order codes ship with QE already fixed to 1, so boot2's 35h check
-# short-circuits and the offending write is never issued -- the bug class cannot occur.
-# This one is also a JLCPCB Basic part, so no extended-part fee and no stock roulette.
-s.place("U3", "Memory_Flash:W25Q32JVSS", 355.6, 187.96, value="W25Q32JVSSIQ",
-        footprint=FP["SOIC8"],
-        props={"MPN": "W25Q32JVSSIQ", "Manufacturer": "Winbond", "LCSC": "C179173",
-               "Description": "4MB QSPI NOR flash, SOIC-8 208mil. The IQ order code "
-                              "fixes QE=1 in silicon, so the stock RP2040 boot2 finds "
-                              "the bit already set and never issues its two-byte WRSR. "
-                              "70k at LCSC and cheaper than the GigaDevice part. NOT "
-                              "W25Q80DV -- that is the older generation, USON-8, and is "
-                              "the part that is genuinely hard to source."})
-decouple("C12", 388.62, 187.96, "100n", "+3V3")
-s.net("+3V3", "U3.8")
-s.net("GND", "U3.4")
-s.net("QSPI_SS", "U1.56", "U3.1")
-s.net("QSPI_SCLK", "U1.52", "U3.6")
-s.net("QSPI_SD0", "U1.53", "U3.5")
-s.net("QSPI_SD1", "U1.55", "U3.2")
-s.net("QSPI_SD2", "U1.54", "U3.3")
-s.net("QSPI_SD3", "U1.51", "U3.7")
-
-# CS# must be at its own supply as the flash powers up, and RP2040's internal pull-up is
-# not active until POR completes. RPi omit this only for a flash they qualified; the
-# GD25Q32E is not that part.  [rpi]
-res("R14", 314.96, 220.98, "10k")
-s.net("+3V3", "R14.1")
-s.net("QSPI_SS", "R14.2")
-
-# BOOTSEL pulls QSPI_SS low through 1K -- with R14 fitted the divider gives 0.30V  [rpi]
+# The QSPI bus still comes out to pins even though the flash die is inside -- the pads
+# drive both. Raspberry Pi ask for minimal track length on them, so these are bare
+# no-connect pads with no copper run anywhere. QSPI_SS is the exception: it still selects
+# BOOTSEL, and 1k to ground beats the internal pull-up with margin.
+s.no_connect("U1.55", "U1.56", "U1.57", "U1.58", "U1.59")
 res("R4", 332.74, 246.38, "1k", angle=90)
-s.net("QSPI_SS", "R4.1")
-s.place("TP5", "Connector:TestPoint", 358.14, 246.38, value="BOOTSEL", footprint=FP["TP"], in_bom=False)
+s.net("QSPI_SS", "U1.60", "R4.1")
+s.place("TP5", "Connector:TestPoint", 358.14, 246.38, value="BOOTSEL", footprint=FP["TP"],
+        in_bom=False)
 s.net("BOOT_SW", "R4.2", "TP5.1")
 
-# User button on GPIO6  [chosen] — the stock variant sets BUTTON_PIN -1
+# User button on GPIO6  [chosen]
 s.place("SW1", "Switch:SW_Push", 355.6, 274.32, value="USER", footprint=FP["SW"],
         props={"MPN": "TS-1187A-B-A-B", "Manufacturer": "XKB", "LCSC": "C318884"})
-s.net("BTN_USER", "SW1.1", "U1.8")
+s.net("BTN_USER", "SW1.1", "U1.9")                 # GPIO6
 s.net("GND", "SW1.2")
 
 s.place("TP1", "Connector:TestPoint", 226.06, 246.38, value="SWCLK", footprint=FP["TP"], in_bom=False)
@@ -408,8 +410,8 @@ s.place("TP4", "Connector:TestPoint", 287.02, 246.38, value="RUN", footprint=FP[
 s.net("RUN", "TP4.1")
 s.place("TP6", "Connector:TestPoint", 307.34, 246.38, value="SDA", footprint=FP["TP"], in_bom=False)
 s.place("TP7", "Connector:TestPoint", 327.66, 246.38, value="SCL", footprint=FP["TP"], in_bom=False)
-s.net("I2C_SDA", "U1.6", "TP6.1")                  # GPIO4 = Wire0 SDA
-s.net("I2C_SCL", "U1.7", "TP7.1")                  # GPIO5 = Wire0 SCL
+s.net("I2C_SDA", "U1.7", "TP6.1")                  # GPIO4 = Wire0 SDA
+s.net("I2C_SCL", "U1.8", "TP7.1")                  # GPIO5 = Wire0 SCL
 res("R12", 307.34, 220.98, "4k7")                  # I2C is open drain: the bus cannot be
 res("R13", 327.66, 220.98, "4k7")                  # released high without these
 s.net("+3V3", "R12.1", "R13.1")
@@ -448,10 +450,10 @@ s.net("VR_PA", "U2.24")
 s.no_connect("U2.9")
 
 # SPI1 + control  [variant]
-s.net("LORA_SCK", "U2.18", "U1.17")                # GPIO14
-s.net("LORA_MOSI", "U2.17", "U1.18")               # GPIO15
+s.net("LORA_SCK", "U2.18", "U1.18")                # GPIO14
+s.net("LORA_MOSI", "U2.17", "U1.19")               # GPIO15
 s.net("LORA_MISO", "U2.16", "U1.36")               # GPIO24
-s.net("LORA_CS", "U2.19", "U1.16")                 # GPIO13
+s.net("LORA_CS", "U2.19", "U1.17")                 # GPIO13
 s.net("LORA_RST", "U2.15", "U1.35")                # GPIO23
 s.net("LORA_BUSY", "U2.14", "U1.29")               # GPIO18
 s.net("LORA_DIO1", "U2.13", "U1.27")               # GPIO16
@@ -608,9 +610,10 @@ s.net("GND", "R10.2")
 s.quiet_pin("R10.1")
 
 # Unused GPIOs get an explicit no-connect so ERC stays meaningful.
-ALL_GPIO_PINS = list(range(2, 10)) + list(range(11, 19)) + list(range(27, 33)) + \
-    list(range(34, 42))
-USED_GPIO_PINS = {4, 5, 6, 7, 8, 16, 17, 18, 27, 28, 29, 35, 36}
+# RP2354A GPIO pin numbers (QFN-60): GPIO0..29 land on these package pins.
+ALL_GPIO_PINS = [2, 3, 4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19,
+                 27, 28, 29, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 43]
+USED_GPIO_PINS = {4, 5, 7, 8, 9, 17, 18, 19, 27, 28, 29, 35, 36}
 for pin in ALL_GPIO_PINS:
     if pin not in USED_GPIO_PINS:
         s.no_connect("U1.%d" % pin)

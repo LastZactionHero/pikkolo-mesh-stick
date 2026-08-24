@@ -3,10 +3,10 @@
 Status 2026-08-23. Schematic captured and verified; layout not started.
 
 ```
-verify_netlist.py   59 intended / 59 exported / 0 discrepancies
+verify_netlist.py   56 intended / 56 exported / 0 discrepancies
 kicad-cli sch erc   0 errors, 1 warning (explained below)
-check_design.py     75 parts, 59 nets, 0 FAIL
-bom.py              35 line items, 64 fitted placements, 2 DNP
+check_design.py     76 parts, 56 nets, 0 FAIL
+bom.py              36 line items, 67 fitted placements, 2 DNP
 ready_to_route.py   5 of 6 mechanical gates PASS
 ```
 
@@ -186,7 +186,7 @@ so an open question cannot be forgotten into a fab order. All are now closed.
 | `stackup.layers` | **4**, `JLC04081H-3313` | Not for via inductance — that argument was recomputed and does not survive at 0.8 mm, where the resonances land at 2.2–3.9 GHz and help. It buys an uninterrupted ground plane 0.0994 mm under every RF element and a 50 Ω line 0.15 mm wide instead of 1.34 mm. Fee-free; ≤ $0.15/board at qty 100. |
 | `rf_network` | **`johanson-ipd`**, `0900FM15K0039001E` | Replaces 13 discretes with one factory-trimmed LTCC part, and fixes the underlying defect: the discrete TX arm was Semtech's **SX1261** topology being run at +22 dBm. The **K** variant, not the D — see the FCC section. KiCad already ships the symbol and footprint. |
 | `antenna` | **SMA(F) right-angle, BWSMA-KWE-Z001** (C496551) | A real SMA jack, through-hole. The earlier reason for avoiding board-edge SMA — that the Taoglas "caps at 0.79 mm" — was a misreading: its spec table says 0.8 mm, only the footprint page says 0.79, and 0.79 mm *is* 0.031 in, the industry number for a 0.8 mm board. The real objection applies to every edge launch: tightening an SMA to its spec torque (0.57 N·m) puts ~134 MPa of shear into a 20 × 0.8 mm FR-4 strip, past FR-4's shear strength. Through-hole legs carry that through plated barrels instead, and make thickness a non-parameter. $0.51 and 130k at LCSC against $3.75–4.01 for edge launches; KiCad already ships the footprint. |
-| `flash_mpn` | **W25Q32JVSSIQ** (C179173) | The GD25Q32E accepts only a **one-byte** 01h status-register write; RP2040's stock boot2 issues a two-byte form, so the quad-enable bit never gets set and the chip faults out of boot — after enumerating and accepting a UF2. The Winbond `…IQ` order codes ship QE fixed at 1, so boot2 finds the bit already set and never issues the write. Checked against LCSC rather than assumed: 70,003 in stock and **cheaper** than the GigaDevice part it replaces ($0.554 vs $0.906). Same 4 MB, same 208-mil SOIC-8, pin-identical symbol. The Winbond part that really is hard to source is **W25Q80DV** — an older generation in USON-8, and a different part entirely. |
+| `flash_mpn` | **in package** — U1 is **RP2354A** (C41378174) | The owner's call, made twice: no second memory chip. RP2354A is an RP2350A die with a Winbond W25Q16JVWI 2 MB flash die stacked in the same QFN-60, so the external flash and its whole failure class disappear — a flash that only accepts a one-byte `01h` status-register write cannot have its quad-enable bit set by the stock boot2, which is why the GD25Q32E was rejected. 2 MB is enough, measured: Meshtastic's pico2 image is 978,688 B against 1,536 kB of sketch space, 62% used. Honest cost: RP2350's core supply is a **buck**, so it adds a 3.3 µH shielded inductor and a 33 Ω VREG_AVDD filter — net **+1 line item**, not −1. What you buy is the failure mode gone, one fewer vendor, and six QSPI traces off a 20 mm board. |
 | `rails` | **two LDOs** | Not a preference — a number. Merged onto one ME6211 the worst-case corner is 432 mW against that package's 300 mW **absolute maximum**. Splitting 72 mA / 121 mA keeps both inside SOA. |
 | `ferrite_fb1` | **deleted** | With the VBUS bulk cut to spec it was left driving 2 µF: a 90–145 kHz tank damped only by its own DCR, ringing 13–49 % above 5 V on hot-plug — past the LP5907's 6.0 V absolute maximum. |
 
