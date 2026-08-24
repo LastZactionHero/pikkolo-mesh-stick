@@ -10,6 +10,7 @@ not the raw part count -- is what a fab charges setup for.
     python3 bom.py --jlc out.csv   JLCPCB assembly BOM (Comment / Designator / Footprint / LCSC)
 """
 import csv
+import json
 import pathlib
 import re
 import sys
@@ -54,6 +55,52 @@ def lines():
     return sorted(out, key=lambda g: _natural(g["refs"][0]))
 
 
+def cost_report(rows, builds=(10, 100)):
+    """
+    What the board costs, and -- for a hand-sourced build -- what the CART costs.
+
+    Those are different numbers and the gap is the point. Most 0402 passives carry a
+    100-piece minimum, so a ten-board build buys 100 of nearly everything and throws most
+    of it away. Unit-price optimisation barely moves the cart; line-item count does.
+    """
+    prices = json.loads((HERE / "prices.json").read_text())
+    spec = prices["_spec_resistor"]
+    print("Prices are a %s snapshot -- re-check before ordering.\n" % prices["_snapshot"])
+    for build in builds:
+        key = "p10" if build <= 10 else "p100"
+        board = cart = 0.0
+        unpriced = []
+        print("=== %d boards " % build + "=" * 46)
+        print("  %-24s %3s %9s %9s %8s" % ("LINE", "QTY", "UNIT", "BOARD", "CART"))
+        for r in rows:
+            if r["dnp"]:
+                continue
+            pr = prices.get(r["lcsc"]) or prices.get(r["mpn"])
+            if pr is None:
+                if all(x[0] == "R" for x in r["refs"]):
+                    pr = spec
+                else:
+                    unpriced.append(r); continue
+            need = r["qty"] * build
+            buy = max(need, pr.get("moq", 1))
+            buy = -(-buy // pr.get("moq", 1)) * pr.get("moq", 1)
+            b = r["qty"] * pr[key]
+            c = buy * pr[key]
+            board += b; cart += c
+            print("  %-24s %3d %9.4f %9.3f %8.2f%s"
+                  % ((",".join(r["refs"]))[:24], r["qty"], pr[key], b, c,
+                     "   <- MOQ %d" % pr["moq"] if buy > need else ""))
+        print("  %-24s %31s %8.2f" % ("", "parts per board  $%.2f" % board, cart))
+        print("  %-24s %31s %8.2f" % ("", "x %d boards      $%.2f" % (build, board * build), cart))
+        waste = cart - board * build
+        print("  MOQ overbuy on a %d-board run: $%.2f (%.0f%% of the cart)"
+              % (build, waste, 100 * waste / cart if cart else 0))
+        if unpriced:
+            print("  NOT PRICED: %s" % ", ".join(",".join(r["refs"]) for r in unpriced))
+        print()
+    return 0
+
+
 def main():
     rows = lines()
     fitted = [r for r in rows if not r["dnp"]]
@@ -79,6 +126,9 @@ def main():
                             r["footprint"].split(":")[-1], r["lcsc"]])
         print("wrote %s (%d fitted lines)" % (path, len(fitted)))
         return 0
+
+    if "--cost" in sys.argv:
+        return cost_report(rows)
 
     print("%-26s %3s  %-34s %-20s %s" % ("REFS", "QTY", "VALUE / FOOTPRINT", "MPN", "LCSC"))
     for r in rows:
