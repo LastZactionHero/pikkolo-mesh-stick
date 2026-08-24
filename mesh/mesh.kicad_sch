@@ -19284,7 +19284,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Inductor_SMD:L_Cenker_CKCS3012"
+		(property "Footprint" "zach:L_MPN3012S_3.0x3.0mm"
 			(at 370.84 40.64 270)
 			(hide yes)
 			(show_name no)
@@ -19306,7 +19306,7 @@
 				)
 			)
 		)
-		(property "Description" "RP2350 core buck inductor: 3.3uH +/-20% shielded, 135mOhm, Isat 1.7A. Polarity/orientation per the datasheet. VERIFY the land pattern against the MPN3012S drawing before fab -- the footprint here is a generic 3012 land."
+		(property "Description" "RP2350 core buck inductor: 3.3uH +/-20% shielded, 135mOhm, Isat 1.7A. Land pattern transcribed from the manufacturer datasheet: pads 1.10 x 2.7mm at +/-1.05, gap 1.00."
 			(at 370.84 40.64 270)
 			(hide yes)
 			(show_name no)

@@ -66,7 +66,7 @@ DECISIONS = dict(
 
 FP = dict(
     RP2354="zach:RP2354A-QFN-60-1EP_7x7mm_P0.4mm_EP-vias",
-    L3012="Inductor_SMD:L_Cenker_CKCS3012",
+    L3012="zach:L_MPN3012S_3.0x3.0mm",
     SX1262="zach:SX1262-QFN-24-1EP_4x4mm_P0.5mm_EP-vias",
     SOIC8="Package_SO:SOIC-8_5.3x5.3mm_P1.27mm",
     SC70_6="Package_TO_SOT_SMD:SOT-363_SC-70-6",
@@ -359,9 +359,8 @@ s.net("+3V3", "U1.49")
 ind("L2", 370.84, 40.64, "3u3", angle=90, fp=FP["L3012"],
     props={"MPN": "MPN3012S3R3MT", "Manufacturer": "Cenker", "LCSC": "C52024124",
            "Description": "RP2350 core buck inductor: 3.3uH +/-20% shielded, 135mOhm, "
-                          "Isat 1.7A. Polarity/orientation per the datasheet. VERIFY the "
-                          "land pattern against the MPN3012S drawing before fab -- the "
-                          "footprint here is a generic 3012 land."})
+                          "Isat 1.7A. Land pattern transcribed from the manufacturer "
+                          "datasheet: pads 1.10 x 2.7mm at +/-1.05, gap 1.00."})
 s.net("VREG_LX", "U1.48", "L2.1")
 s.net("DVDD", "U1.6", "U1.50", "L2.2", "#FLG_DVDD.1")   # DVDD(x3) + VREG_FB sense
 for ref, x, pin in [("C7", 218.44, "DVDD pin 6"), ("C42", 233.68, "DVDD pin 23"),
